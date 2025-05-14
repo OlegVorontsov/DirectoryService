@@ -10,4 +10,10 @@
       <ProjectReference Include="..\DirectoryService.Domain\DirectoryService.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="SharedService.Core" Version="1.0.0" />
+      <PackageReference Include="SharedService.Framework" Version="1.0.0" />
+      <PackageReference Include="SharedService.SharedKernel" Version="1.0.0" />
+    </ItemGroup>
+
 </Project>
