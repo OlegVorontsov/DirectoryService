@@ -1,7 +1,37 @@
+using DirectoryService.Application;
+using Microsoft.OpenApi.Models;
+using SharedService.SharedKernel.Errors;
+using SharedService.SharedKernel.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+var services = builder.Services;
+var configuration = builder.Configuration;
+
+services.AddOpenApi(options =>
+{
+    options.AddSchemaTransformer((schema, context, _) =>
+    {
+        if (context.JsonTypeInfo.Type == typeof(Envelope<ErrorList>))
+        {
+            if (schema.Properties.TryGetValue("errors", out var errorsProp))
+            {
+                errorsProp.Items.Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.Schema,
+                    Id = "Error",
+                };
+            }
+        }
+
+        return Task.CompletedTask;
+    });
+});
+
+services.AddControllers();
+
+// register modules
+services.AddApplication(configuration);
 
 var app = builder.Build();
 
