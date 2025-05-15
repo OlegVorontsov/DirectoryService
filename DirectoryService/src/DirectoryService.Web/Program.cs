@@ -5,7 +5,10 @@ using SharedService.SharedKernel.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi(options =>
+var services = builder.Services;
+var configuration = builder.Configuration;
+
+services.AddOpenApi(options =>
 {
     options.AddSchemaTransformer((schema, context, _) =>
     {
@@ -25,9 +28,10 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
-builder.Services.AddControllers();
+services.AddControllers();
 
-builder.Services.AddSingleton<TestHandler>();
+// register modules
+services.AddApplication(configuration);
 
 var app = builder.Build();
 

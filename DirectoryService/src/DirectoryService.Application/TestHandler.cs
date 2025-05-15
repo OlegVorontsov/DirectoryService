@@ -1,11 +1,13 @@
 using CSharpFunctionalExtensions;
+using SharedService.Core.Abstractions;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Application;
 
-public class TestHandler
+public class TestHandler : ICommandHandler<string, TestCommand>
 {
     public async Task<Result<string, ErrorList>> Handle(
+        TestCommand command,
         CancellationToken cancellationToken)
     {
         var testClass = new TestClass();

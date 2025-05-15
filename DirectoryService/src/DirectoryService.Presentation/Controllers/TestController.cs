@@ -15,6 +15,8 @@ public class TestController : ControllerBase
         [FromServices] TestHandler handler,
         CancellationToken cancellationToken = default)
     {
-        return await handler.Handle(cancellationToken);
+        return await handler.Handle(
+            new TestCommand(Guid.NewGuid()),
+            cancellationToken);
     }
 }
