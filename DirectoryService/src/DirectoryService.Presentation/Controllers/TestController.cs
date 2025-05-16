@@ -1,4 +1,5 @@
 using DirectoryService.Application;
+using DirectoryService.Application.Test;
 using Microsoft.AspNetCore.Mvc;
 using SharedService.Framework.EndpointResults;
 using SharedService.SharedKernel.Models;
@@ -9,14 +10,16 @@ namespace DirectoryService.Presentation.Controllers;
 [Route("[controller]")]
 public class TestController : ControllerBase
 {
-    [HttpGet]
+    [HttpPost("{testId:guid}")]
     [ProducesResponseType<Envelope<string>>(200)]
     public async Task<EndpointResult<string>> Test(
+        [FromRoute] Guid testId,
+        [FromBody] TestRequest request,
         [FromServices] TestHandler handler,
         CancellationToken cancellationToken = default)
     {
         return await handler.Handle(
-            new TestCommand(Guid.NewGuid()),
+            request.ToCommand(testId),
             cancellationToken);
     }
 }

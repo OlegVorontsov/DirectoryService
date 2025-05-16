@@ -1,15 +1,27 @@
 using CSharpFunctionalExtensions;
+using FluentValidation;
 using SharedService.Core.Abstractions;
+using SharedService.Core.Validation;
 using SharedService.SharedKernel.Errors;
 
-namespace DirectoryService.Application;
+namespace DirectoryService.Application.Test;
 
-public class TestHandler : ICommandHandler<string, TestCommand>
+public class TestHandler(
+    IValidator<TestCommand> validator) :
+    ICommandHandler<string, TestCommand>
 {
     public async Task<Result<string, ErrorList>> Handle(
         TestCommand command,
         CancellationToken cancellationToken)
     {
+        var validationResult = await validator.ValidateAsync(
+            command, cancellationToken);
+        if (validationResult.IsValid == false)
+        {
+            throw new ApplicationException("Validation Failed");
+            return validationResult.ToList();
+        }
+
         var testClass = new TestClass();
 
         var unitResult = testClass.UnitResultMethod();

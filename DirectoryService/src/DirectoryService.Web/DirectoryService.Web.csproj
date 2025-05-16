@@ -8,8 +8,9 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4"/>
-        <PackageReference Include="sharedservice.core" Version="1.0.1" />
-        <PackageReference Include="SharedService.SharedKernel" Version="1.0.1" />
+        <PackageReference Include="sharedservice.core" Version="1.0.2" />
+        <PackageReference Include="sharedservice.framework" Version="1.0.2" />
+        <PackageReference Include="SharedService.SharedKernel" Version="1.0.2" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.1" />
     </ItemGroup>
 
