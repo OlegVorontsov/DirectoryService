@@ -1,5 +1,6 @@
 using DirectoryService.Application;
 using Microsoft.OpenApi.Models;
+using SharedService.Framework.Middlewares;
 using SharedService.SharedKernel.Errors;
 using SharedService.SharedKernel.Models;
 
@@ -34,6 +35,8 @@ services.AddControllers();
 services.AddApplication(configuration);
 
 var app = builder.Build();
+
+app.UseExceptionMiddleware();
 
 if (app.Environment.IsDevelopment())
 {

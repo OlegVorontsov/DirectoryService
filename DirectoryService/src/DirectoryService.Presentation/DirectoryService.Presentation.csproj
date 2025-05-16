@@ -8,8 +8,8 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.3.0" />
-      <PackageReference Include="sharedservice.framework" Version="1.0.1" />
-      <PackageReference Include="SharedService.SharedKernel" Version="1.0.1" />
+      <PackageReference Include="sharedservice.framework" Version="1.0.2" />
+      <PackageReference Include="sharedservice.sharedkernel" Version="1.0.2" />
     </ItemGroup>
 
     <ItemGroup>

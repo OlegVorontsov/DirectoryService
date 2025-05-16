@@ -1,4 +1,5 @@
 using System.Reflection;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedService.Core.Abstractions;
@@ -13,7 +14,8 @@ public static class ApplicationDependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddHandlers(_assembly);
+        services.AddHandlers(_assembly)
+                .AddValidatorsFromAssembly(_assembly);
 
         return services;
     }
