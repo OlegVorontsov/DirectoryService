@@ -21,4 +21,8 @@
       <ProjectReference Include="..\DirectoryService.Presentation\DirectoryService.Presentation.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\swagger-ui\" />
+    </ItemGroup>
+
 </Project>
