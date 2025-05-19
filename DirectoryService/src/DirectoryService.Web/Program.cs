@@ -1,4 +1,5 @@
 using DirectoryService.Application;
+using DirectoryService.Web;
 using Microsoft.OpenApi.Models;
 using SharedService.Framework.Middlewares;
 using SharedService.SharedKernel.Errors;
@@ -32,7 +33,8 @@ services.AddOpenApi(options =>
 services.AddControllers();
 
 // register modules
-services.AddApplication(configuration);
+services.AddWeb(configuration)
+        .AddApplication(configuration);
 
 var app = builder.Build();
 
