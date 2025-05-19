@@ -8,6 +8,9 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
         <PackageReference Include="sharedservice.core" Version="1.0.2" />
         <PackageReference Include="sharedservice.framework" Version="1.0.2" />
         <PackageReference Include="SharedService.SharedKernel" Version="1.0.2" />

@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using SharedService.Core.Abstractions;
 using SharedService.Core.Validation;
 using SharedService.SharedKernel.Errors;
@@ -7,13 +8,16 @@ using SharedService.SharedKernel.Errors;
 namespace DirectoryService.Application.Test;
 
 public class TestHandler(
-    IValidator<TestCommand> validator) :
+    IValidator<TestCommand> validator,
+    ILogger<TestHandler> logger) :
     ICommandHandler<string, TestCommand>
 {
     public async Task<Result<string, ErrorList>> Handle(
         TestCommand command,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation("test handler {testId}", command.TestId);
+
         var validationResult = await validator.ValidateAsync(
             command, cancellationToken);
         if (validationResult.IsValid == false)
