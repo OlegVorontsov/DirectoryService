@@ -8,7 +8,7 @@ public class PositionName
     public const int MAX_LENGTH = 100;
     public const int MIN_LENGTH = 3;
 
-    public string Value { get; }
+    public string Value { get; private set; }
 
     public static Result<PositionName, Error> Create(string value)
     {

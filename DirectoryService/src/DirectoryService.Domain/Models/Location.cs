@@ -6,13 +6,13 @@ namespace DirectoryService.Domain.Models;
 
 public class Location
 {
-    public Id<Location> Id { get; }
-    public LocationName Name { get; }
-    public LocationAddress Address { get; }
-    public IANATimeZone TimeZone { get; }
-    public bool IsActive { get; } = true;
-    public DateTime CreatedAt { get; }
-    public DateTime UpdatedAt { get; }
+    public Id<Location> Id { get; private set; }
+    public LocationName Name { get; private set; }
+    public LocationAddress Address { get; private set; }
+    public IANATimeZone TimeZone { get; private set; }
+    public bool IsActive { get; private set; } = true;
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
 
     private readonly List<DepartmentLocation> _departmentLocations = [];
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations.ToList();

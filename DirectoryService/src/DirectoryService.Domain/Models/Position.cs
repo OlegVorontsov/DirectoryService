@@ -6,12 +6,12 @@ namespace DirectoryService.Domain.Models;
 
 public class Position
 {
-    public Id<Position> Id { get; }
-    public PositionName Name { get; }
-    public PositionDescription Description { get; }
-    public bool IsActive { get; } = true;
-    public DateTime CreatedAt { get; }
-    public DateTime UpdatedAt { get; }
+    public Id<Position> Id { get; private set; }
+    public PositionName Name { get; private set; }
+    public PositionDescription Description { get; private set; }
+    public bool IsActive { get; private set; } = true;
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
 
     public static Result<Position> Create(
         Id<Position> id,

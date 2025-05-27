@@ -8,16 +8,16 @@ namespace DirectoryService.Domain.Models;
 
 public class Department
 {
-    public Id<Department> Id { get; }
-    public DepartmentName Name { get; }
-    public Id<Department>? ParentId { get; }
-    public Department? Parent { get; }
-    public LTree Path { get; }
-    public short Depth { get; }
-    public int ChildrenCount { get; }
-    public bool IsActive { get; } = true;
-    public DateTime CreatedAt { get; }
-    public DateTime UpdatedAt { get; }
+    public Id<Department> Id { get; private set; }
+    public DepartmentName Name { get; private set; }
+    public Id<Department>? ParentId { get; private set; }
+    public Department? Parent { get; private set; }
+    public LTree Path { get; private set; }
+    public short Depth { get; private set; }
+    public int ChildrenCount { get; private set; }
+    public bool IsActive { get; private set; } = true;
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
 
     private readonly List<DepartmentLocation> _departmentLocations = [];
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations.ToList();

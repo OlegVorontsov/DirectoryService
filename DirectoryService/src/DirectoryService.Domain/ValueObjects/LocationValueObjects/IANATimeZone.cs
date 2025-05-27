@@ -9,7 +9,7 @@ public class IANATimeZone
     public const int MAX_LENGTH = 30;
     public const int MIN_LENGTH = 3;
 
-    public string Value { get; }
+    public string Value { get; private set; }
 
     public static Result<IANATimeZone, Error> Create(string value)
     {

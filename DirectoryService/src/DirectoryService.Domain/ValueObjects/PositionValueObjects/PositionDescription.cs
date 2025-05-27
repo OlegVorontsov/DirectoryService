@@ -7,7 +7,7 @@ public class PositionDescription
 {
     public const int MAX_LENGTH = 1000;
 
-    public string Value { get; }
+    public string Value { get; private set; }
 
     public static Result<PositionDescription, Error> Create(string value)
     {

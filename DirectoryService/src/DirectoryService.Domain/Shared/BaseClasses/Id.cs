@@ -3,7 +3,7 @@
 public class Id<TOwner> : IComparable<Id<TOwner>>
     where TOwner : class
 {
-    public Guid Value { get; }
+    public Guid Value { get; private set; }
 
     public static Id<TOwner> GenerateNew() => new(Guid.NewGuid());
 
