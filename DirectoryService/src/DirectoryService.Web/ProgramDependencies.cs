@@ -1,4 +1,5 @@
 using DirectoryService.Application;
+using DirectoryService.Infrastructure;
 using Microsoft.OpenApi.Models;
 using SharedService.SharedKernel.Errors;
 using SharedService.SharedKernel.Models;
@@ -16,7 +17,8 @@ public static class ProgramDependencies
 
         // register modules
         services.AddWeb(configuration)
-                .AddApplication(configuration);
+                .AddApplication(configuration)
+                .AddInfrastructure(configuration);
 
         return services;
     }

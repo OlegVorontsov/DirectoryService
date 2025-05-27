@@ -31,7 +31,7 @@ public class ApplicationDBContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(ApplicationDBContext).Assembly,
-            type => type.FullName?.Contains("Database.Configurations") ?? false);
+            type => type.FullName?.Contains("DataBase.Configurations") ?? false);
 
         base.OnModelCreating(modelBuilder);
     }
