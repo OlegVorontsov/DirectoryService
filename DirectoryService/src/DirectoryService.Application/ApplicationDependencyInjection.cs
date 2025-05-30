@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Text.Json;
+using DirectoryService.Domain.ValueObjects.DepartmentValueObjects;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,9 +16,23 @@ public static class ApplicationDependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        SlugReplaceDictionary();
+
         services.AddHandlers(_assembly)
                 .AddValidatorsFromAssembly(_assembly);
 
         return services;
+    }
+
+    private static void SlugReplaceDictionary()
+    {
+        var slugReplaceDictionaryJson = File.ReadAllText("etc/slugReplaceDictionary.json");
+        var slugReplaceDictionary = JsonSerializer.Deserialize<Dictionary<char, string>>(slugReplaceDictionaryJson);
+        if (slugReplaceDictionary is null)
+            throw new ApplicationException("Couldn't deserialize slug settings from slugReplaceDictionary.json");
+
+        var setReplaceCharsResult = DepartmentPath.SetReplaceChars(slugReplaceDictionary);
+        if(setReplaceCharsResult.IsFailure)
+            throw new ApplicationException(setReplaceCharsResult.Error.ToString());
     }
 }

@@ -1,3 +1,4 @@
+using DirectoryService.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DirectoryService.Infrastructure.DataBase;
@@ -13,6 +14,10 @@ public class ApplicationDBContext : DbContext
     {
         _connectionString = connectionString;
     }
+
+    public DbSet<Department> Departments { get; set; }
+    public DbSet<Location> Locations { get; set; }
+    public DbSet<Position> Positions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
