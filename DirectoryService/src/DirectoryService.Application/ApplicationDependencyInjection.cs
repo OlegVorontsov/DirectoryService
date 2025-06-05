@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using DirectoryService.Domain.Models;
 using DirectoryService.Domain.ValueObjects.DepartmentValueObjects;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
@@ -31,7 +32,7 @@ public static class ApplicationDependencyInjection
         if (slugReplaceDictionary is null)
             throw new ApplicationException("Couldn't deserialize slug settings from slugReplaceDictionary.json");
 
-        var setReplaceCharsResult = DepartmentPath.SetReplaceChars(slugReplaceDictionary);
+        var setReplaceCharsResult = Department.SetReplaceChars(slugReplaceDictionary);
         if(setReplaceCharsResult.IsFailure)
             throw new ApplicationException(setReplaceCharsResult.Error.ToString());
     }

@@ -15,7 +15,7 @@ public record DepartmentDTO(
             entity.Id.Value,
             entity.Name.Value,
             entity.ParentId?.Value,
-            entity.Path.Value,
+            entity.Path,
             entity.Depth,
             entity.ChildrenCount);
 }

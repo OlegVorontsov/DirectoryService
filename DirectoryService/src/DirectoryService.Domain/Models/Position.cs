@@ -26,6 +26,17 @@ public class Position
             createdAt);
     }
 
+    public Position Update(
+        PositionName name,
+        PositionDescription description)
+    {
+        Name = name;
+        Description = description;
+        UpdatedAt = DateTime.UtcNow;
+
+        return this;
+    }
+
     // EF Core
     private Position() { }
 

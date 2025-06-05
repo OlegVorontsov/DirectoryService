@@ -14,7 +14,7 @@ public class Location
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    private readonly List<DepartmentLocation> _departmentLocations = [];
+    private List<DepartmentLocation> _departmentLocations = [];
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations.ToList();
 
     public static Result<Location> Create(
@@ -30,6 +30,19 @@ public class Location
             address,
             timeZone,
             createdAt);
+    }
+
+    public Location Update(
+        LocationName name,
+        LocationAddress address,
+        IANATimeZone timeZone)
+    {
+        Name = name;
+        Address = address;
+        TimeZone = timeZone;
+        UpdatedAt = DateTime.UtcNow;
+
+        return this;
     }
 
     // EF Core

@@ -45,8 +45,8 @@ public class CreatePositionHandler(
 
         logger.LogInformation(
             "Position created with id {0} name {1}",
-            createResult.Value.Name.Value,
-            createResult.Value.Id.Value);
+            createResult.Value.Id.Value,
+            createResult.Value.Name.Value);
 
         return PositionDTO.FromDomainEntity(createResult.Value);
     }

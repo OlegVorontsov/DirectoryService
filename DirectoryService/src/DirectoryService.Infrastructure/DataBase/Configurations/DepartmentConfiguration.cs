@@ -33,6 +33,9 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                .HasColumnName("name");
 
         builder.Property(d => d.ParentId)
+               .HasConversion(
+                   id => id != null ? id.Value : (Guid?)null,
+                   value => value.HasValue ? Id<Department>.Create(value.Value) : null)
                .IsRequired(false)
                .HasColumnName("parent_id");
 
@@ -42,14 +45,12 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                .OnDelete(DeleteBehavior.Restrict); // restricts deletion of parent if it has any children
 
         builder.Property(d => d.Path)
-               .HasConversion(
-                   valueObject => valueObject.Value,
-                   treeFromDataBase => DepartmentPath.CreateFromExisting(treeFromDataBase))
                .IsRequired()
                .HasColumnName("path");
 
         builder.HasIndex(d => d.Path)
                .IsUnique();
+               //.HasMethod("gist");  // to use ltree's operators
 
         builder.Property(d => d.Depth)
                .IsRequired()
@@ -77,5 +78,8 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                    dst => dst.Kind == DateTimeKind.Utc ? dst : DateTime.SpecifyKind(dst, DateTimeKind.Utc))
                .IsRequired()
                .HasColumnName("updated_at");
+
+        builder.Property<uint>("version")
+               .IsRowVersion();
     }
 }

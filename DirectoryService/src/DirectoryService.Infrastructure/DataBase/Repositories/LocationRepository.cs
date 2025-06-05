@@ -11,10 +11,43 @@ namespace DirectoryService.Infrastructure.DataBase.Repositories;
 public class LocationRepository(
     ApplicationDBContext context) : ILocationRepository
 {
+    public async Task<Result<Location, Error>> GetByIdAsync(
+        Id<Location> id,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await context.Locations
+            .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
+        if (entity is null)
+            return Errors.General.NotFound(id.Value);
+
+        return entity;
+    }
+
+    public async Task<Result<Location, Error>> GetByNameAsync(
+        LocationName name,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await context.Locations
+            .FirstOrDefaultAsync(d => d.Name == name, cancellationToken);
+        if (entity is null)
+            return Errors.General.NotFound();
+
+        return entity;
+    }
+
     public async Task<Result<Location>> CreateAsync(
         Location entity, CancellationToken cancellationToken = default)
     {
         context.Locations.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return entity;
+    }
+
+    public async Task<Result<Location>> UpdateAsync(
+        Location entity,
+        CancellationToken cancellationToken = default)
+    {
         await context.SaveChangesAsync(cancellationToken);
 
         return entity;
