@@ -16,13 +16,15 @@ public class ApplicationDBContext : DbContext
     }
 
     public DbSet<Department> Departments { get; set; }
+    public DbSet<DepartmentLocation> DepartmentLocations { get; set; }
     public DbSet<Location> Locations { get; set; }
     public DbSet<Position> Positions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql(_connectionString);
-        optionsBuilder.LogTo(Console.WriteLine);
+        optionsBuilder.LogTo(Console.WriteLine)
+                      .EnableSensitiveDataLogging();
         optionsBuilder.UseSnakeCaseNamingConvention();
 
         base.OnConfiguring(optionsBuilder);

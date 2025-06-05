@@ -1,7 +1,7 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Models;
 using DirectoryService.Domain.Shared.BaseClasses;
-using DirectoryService.Domain.ValueObjects.DepartmentValueObjects;
+using Microsoft.EntityFrameworkCore;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Application.Interfaces.Repositories;
@@ -12,15 +12,22 @@ public interface IDepartmentRepository
         Department entity,
         CancellationToken cancellationToken = default);
 
-    Task<Result<Department>> UpdateAsync(
+    Task<Result<Department, Error>> UpdateAsync(
         Department entity,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        IEnumerable<DepartmentLocation>? oldDepartmentLocations = null);
 
     Task<Result<Department, Error>> GetByIdAsync(
         Id<Department> id,
         CancellationToken cancellationToken = default);
 
     Task<UnitResult<Error>> IsPathUniqueAsync(
-        DepartmentPath path,
+        LTree path,
         CancellationToken cancellationToken = default);
+
+    Task<Result<IEnumerable<Department>>> GetFlatTreeAsync(
+        LTree path, CancellationToken cancellationToken = default);
+
+    Task<UnitResult<Error>> UpdateChildrenPathAsync(
+        LTree oldPath, LTree newPath, CancellationToken cancellationToken = default);
 }
