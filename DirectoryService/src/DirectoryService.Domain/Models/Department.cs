@@ -130,6 +130,23 @@ public class Department
         return UnitResult.Success<Error>();
     }
 
+    public bool AreLocationChanged(IEnumerable<Guid> locationIds)
+    {
+        if (DepartmentLocations.Count != locationIds.Count())
+            return true;
+
+        for (int i = 0; i < DepartmentLocations.Count; i++)
+        {
+            if (DepartmentLocations[i].LocationId.Value != locationIds.ElementAt(i))
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool IsNameChanged(DepartmentName? newName) => Name.Value != newName!.Value;
+    public bool IsParentChanged(Id<Department>? updatedParentId) => ParentId != updatedParentId;
+
     // EF Core
     private Department() { }
 

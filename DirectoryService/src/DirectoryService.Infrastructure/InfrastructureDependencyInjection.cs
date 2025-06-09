@@ -28,6 +28,7 @@ public static class InfrastructureDependencyInjection
         services.AddScoped<ILocationRepository, LocationRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IPositionRepository, PositionRepository>();
+        services.AddScoped<IDepartmentLocationRepository, DepartmentLocationRepository>();
 
         services.AddScoped<IUnitOfWork, DirectoryServiceUnitOfWork>();
 

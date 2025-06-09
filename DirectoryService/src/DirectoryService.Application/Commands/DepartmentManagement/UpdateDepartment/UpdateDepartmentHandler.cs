@@ -19,6 +19,7 @@ public class UpdateDepartmentHandler(
     ILogger<UpdateDepartmentHandler> logger,
     IDepartmentRepository departmentRepository,
     ILocationRepository locationRepository,
+    IDepartmentLocationRepository departmentLocationRepository,
     IUnitOfWork unitOfWork)
     : ICommandHandler<DepartmentDTO, UpdateDepartmentCommand>
 {
@@ -40,13 +41,15 @@ public class UpdateDepartmentHandler(
 
         var entity = existResult.Value;
 
-        var newName = DepartmentName.Create(command.Name).Value;
-        bool isNameChanged = entity.Name.Value != newName.Value;
+        var newNameResult = DepartmentName.Create(command.Name);
+        if (newNameResult.IsFailure)
+            return newNameResult.Error.ToErrors();
+        bool isNameChanged = entity.IsNameChanged(newNameResult.Value);
 
         var updatedParentId = command.ParentId is null ?
                               null :
                               Id<Department>.Create(command.ParentId!.Value);
-        bool isParentChanged = entity.ParentId != updatedParentId;
+        bool isParentChanged = entity.IsParentChanged(updatedParentId);
 
         // Get new parent if not null
         Department? newParent = null;
@@ -70,13 +73,13 @@ public class UpdateDepartmentHandler(
 
         // validate new Path
         var updatedPathResult = Department.CreatePath(
-            isNameChanged ? newName : entity.Name,
+            isNameChanged ? newNameResult.Value : entity.Name,
             isParentChanged ? newParent?.Path : entity.Parent?.Path);
         if (updatedPathResult.IsFailure)
             return updatedPathResult.Error.ToErrors();
 
         // validate locations
-        var areLocationsChanged = AreLocationChanged(entity, command);
+        var areLocationsChanged = entity.AreLocationChanged(command.LocationIds);
         if (areLocationsChanged)
         {
             var locationIds = command.LocationIds.Select(Id<Location>.Create);
@@ -101,7 +104,7 @@ public class UpdateDepartmentHandler(
         if (isNameChanged || isParentChanged)
         {
             entity.Update(
-                name: isNameChanged ? newName : entity.Name,
+                name: isNameChanged ? newNameResult.Value : entity.Name,
                 parentId: isParentChanged ? newParent?.Id : entity.ParentId,
                 path: updatedPathResult.Value);
         }
@@ -118,7 +121,7 @@ public class UpdateDepartmentHandler(
             if (oldParentUpdateResult.IsFailure)
             {
                 transaction.Rollback();
-                return oldParentUpdateResult.Error.ToErrors();
+                return Errors.General.Failure(oldParentUpdateResult.Error).ToErrors();
             }
         }
 
@@ -131,21 +134,25 @@ public class UpdateDepartmentHandler(
             if (newParentUpdateResult.IsFailure)
             {
                 transaction.Rollback();
-                return newParentUpdateResult.Error.ToErrors();
+                return Errors.General.Failure(newParentUpdateResult.Error).ToErrors();
             }
         }
 
         // update entity in database
         if (isNameChanged || isParentChanged || areLocationsChanged)
         {
+            var existingLocationIds = entity.DepartmentLocations
+                .Select(d => d.LocationId);
+            var toRemove = oldLocations
+                .Where(old => !existingLocationIds.Contains(old.LocationId));
+            departmentLocationRepository.Remove(toRemove);
+
             var entityUpdateResult = await departmentRepository.UpdateAsync(
-                entity,
-                cancellationToken,
-                oldLocations);
+                entity, cancellationToken);
             if (entityUpdateResult.IsFailure)
             {
                 transaction.Rollback();
-                return entityUpdateResult.Error.ToErrors();
+                return Errors.General.Failure(entityUpdateResult.Error).ToErrors();
             }
         }
 
@@ -153,8 +160,8 @@ public class UpdateDepartmentHandler(
         if (isNameChanged || isParentChanged)
         {
             var childrenUpdateResult = await departmentRepository.UpdateChildrenPathAsync(
-                oldPath,
-                entity.Path,
+                oldPath, Department.CalculateDepth(oldPath),
+                entity.Path, Department.CalculateDepth(entity.Path),
                 cancellationToken);
             if (childrenUpdateResult.IsFailure)
             {
@@ -187,21 +194,5 @@ public class UpdateDepartmentHandler(
             .FirstOrDefault(d => d.Id == entity.Id) is not null ?
             Errors.General.Failure($"CycleInTree {entity.Id.Value}") :
             UnitResult.Success<Error>();
-    }
-
-    private bool AreLocationChanged(
-        Department entity,
-        UpdateDepartmentCommand command)
-    {
-        if (entity.DepartmentLocations.Count != command.LocationIds.Count())
-            return true;
-
-        for (int i = 0; i < entity.DepartmentLocations.Count; i++)
-        {
-            if (entity.DepartmentLocations[i].LocationId.Value != command.LocationIds.ElementAt(i))
-                return true;
-        }
-
-        return false;
     }
 }

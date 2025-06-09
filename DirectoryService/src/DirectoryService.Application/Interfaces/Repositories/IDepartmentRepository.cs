@@ -12,10 +12,9 @@ public interface IDepartmentRepository
         Department entity,
         CancellationToken cancellationToken = default);
 
-    Task<Result<Department, Error>> UpdateAsync(
+    Task<Result<Department>> UpdateAsync(
         Department entity,
-        CancellationToken cancellationToken = default,
-        IEnumerable<DepartmentLocation>? oldDepartmentLocations = null);
+        CancellationToken cancellationToken = default);
 
     Task<Result<Department, Error>> GetByIdAsync(
         Id<Department> id,
@@ -29,5 +28,7 @@ public interface IDepartmentRepository
         LTree path, CancellationToken cancellationToken = default);
 
     Task<UnitResult<Error>> UpdateChildrenPathAsync(
-        LTree oldPath, LTree newPath, CancellationToken cancellationToken = default);
+        LTree oldPath, short oldPathDepth,
+        LTree newPath, short newPathDepth,
+        CancellationToken cancellationToken = default);
 }

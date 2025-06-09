@@ -19,45 +19,12 @@ public class DepartmentRepository(ApplicationDBContext context) : IDepartmentRep
         return entity;
     }
 
-    public async Task<Result<Department, Error>> UpdateAsync(
+    public async Task<Result<Department>> UpdateAsync(
         Department entity,
-        CancellationToken cancellationToken = default,
-        IEnumerable<DepartmentLocation>? oldDepartmentLocations = null)
+        CancellationToken cancellationToken = default)
     {
-        try
-        {
-            // sync DepartmentLocations
-            if (oldDepartmentLocations is not null)
-            {
-                foreach (var item in oldDepartmentLocations)
-                {
-                    var found = entity.DepartmentLocations
-                        .FirstOrDefault(d => d.LocationId == item.LocationId);
-                    if (found is null)
-                        context.DepartmentLocations.Remove(item);
-                }
-
-                // this part was used to add new DepartmentLocations
-                // after refactoring it is not needed anymore
-                //foreach (var newItem in entity.DepartmentLocations)
-                //{
-                //    var found = oldDepartmentLocations
-                //        .FirstOrDefault(d => d.LocationId == newItem.LocationId);
-                //    if (found is null)
-                //        _context.DepartmentLocations.Add(newItem);
-                //}
-            }
-
-            // Not needed because entity is tracked by EF Core,
-            // and it wil auto update it when SaveChanges is called
-            // var entry = _context.Departments.Update(entity);
-            await context.SaveChangesAsync(cancellationToken);
-            return entity;
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return Errors.General.Failure($"ConcurrentUpdateFailed {entity.Id.Value}");
-        }
+        await context.SaveChangesAsync(cancellationToken);
+        return entity;
     }
 
     public async Task<Result<Department, Error>> GetByIdAsync(
@@ -96,13 +63,12 @@ public class DepartmentRepository(ApplicationDBContext context) : IDepartmentRep
     }
 
     public async Task<UnitResult<Error>> UpdateChildrenPathAsync(
-        LTree oldPath, LTree newPath, CancellationToken cancellationToken = default)
+        LTree oldPath, short oldPathDepth,
+        LTree newPath, short newPathDepth,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            var oldDepth = Department.CalculateDepth(oldPath);
-            var newDepth = Department.CalculateDepth(newPath);
-
             // Intention:
             // UPDATE item
             // SET path = NEW.path || subpath(path, nlevel(OLD.path))
@@ -115,10 +81,10 @@ public class DepartmentRepository(ApplicationDBContext context) : IDepartmentRep
                     propCall => propCall
                         .SetProperty(
                             d => d.Path,
-                            d => (LTree)(newPath + "." + d.Path.Subpath(oldDepth + 1)))
+                            d => (LTree)(newPath + "." + d.Path.Subpath(oldPathDepth + 1)))
                         .SetProperty(
                             d => d.Depth,
-                            d => d.Path.NLevel - 1 - oldDepth + newDepth),  // d.Path.NLevel - 1 won't work, because it will not be updated yet
+                            d => d.Path.NLevel - 1 - oldPathDepth + newPathDepth),  // d.Path.NLevel - 1 won't work, because it will not be updated yet
                     cancellationToken);
 
             return UnitResult.Success<Error>();
