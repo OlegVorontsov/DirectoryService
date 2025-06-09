@@ -50,21 +50,19 @@ public class CreateDepartmentHandler(
             parent = parentResult.Value;
         }
 
-        var path = DepartmentPath.CreateFromStringAndParent(command.Name, parent?.Path.Value);
+        var name = DepartmentName.Create(command.Name).Value;
+
+        var pathResult = Department.CreatePath(name, parent?.Path);
+        if (pathResult.IsFailure) return pathResult.Error.ToErrors();
 
         var isPathUnique = await departmentRepository.IsPathUniqueAsync(
-            path, cancellationToken);
+            pathResult.Value, cancellationToken);
         if (isPathUnique.IsFailure) return isPathUnique.Error.ToErrors();
 
         var departmentResult = Department.Create(
             id: Id<Department>.GenerateNew(),
-            name: DepartmentName.Create(command.Name).Value,
-            parentId: parentId,
-            path: path,
-            depth: parent is null ?
-                (short)0 :
-                (short)(parent.Depth + 1),
-            childrenCount: 0,
+            name: name,
+            parent: parent,
             createdAt: DateTime.UtcNow);
 
         if (departmentResult.IsFailure) return departmentResult.Error.ToErrors();
@@ -72,7 +70,7 @@ public class CreateDepartmentHandler(
 
         var transaction = await unitOfWork.BeginTransactionAsync(cancellationToken);
 
-        entity.AddLocations(locationIds);
+        entity.UpdateLocations(locationIds);
 
         var createResult = await departmentRepository.CreateAsync(entity, cancellationToken);
         if (createResult.IsFailure)
@@ -88,7 +86,7 @@ public class CreateDepartmentHandler(
             if (updateParentResult.IsFailure)
             {
                 transaction.Rollback();
-                return Errors.General.Failure(updateParentResult.Error).ToErrors();
+                return Errors.General.Failure("updateParent").ToErrors();
             }
         }
 
