@@ -1,4 +1,5 @@
 using DirectoryService.Application.Commands.DepartmentManagement.CreateDepartment;
+using DirectoryService.Application.Commands.DepartmentManagement.SoftDeleteDepartment;
 using DirectoryService.Application.Commands.DepartmentManagement.UpdateDepartment;
 using DirectoryService.Application.Shared.DTOs;
 using DirectoryService.Presentation.Requests;
@@ -23,4 +24,11 @@ public class DepartmentsController : ApplicationController
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default) =>
         await handler.Handle(request.ToCommand(id), cancellationToken);
+
+    [HttpDelete("{id:guid}")]
+    public async Task<EndpointResult<Guid>> Delete(
+        [FromServices] SoftDeleteDepartmentHandler handler,
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(new SoftDeleteDepartmentCommand(id), cancellationToken);
 }

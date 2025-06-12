@@ -16,6 +16,10 @@ public interface ILocationRepository
         LocationName name,
         CancellationToken cancellationToken = default);
 
+    Task<Result<IEnumerable<Location>>> GetLocationsForDepartmentAsync(
+        Id<Department> id,
+        CancellationToken cancellationToken = default);
+
     Task<Result<Location>> CreateAsync(
         Location entity,
         CancellationToken cancellationToken = default);

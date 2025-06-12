@@ -48,8 +48,8 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                .IsRequired()
                .HasColumnName("path");
 
-        builder.HasIndex(d => d.Path)
-               .IsUnique();
+        builder.HasIndex(d => d.Path);
+               //.IsUnique();
                //.HasMethod("gist");  // to use ltree's operators
 
         builder.Property(d => d.Depth)

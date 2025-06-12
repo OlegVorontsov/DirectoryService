@@ -35,6 +35,19 @@ public class LocationRepository(
         return entity;
     }
 
+    public async Task<Result<IEnumerable<Location>>> GetLocationsForDepartmentAsync(
+        Id<Department> id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await (
+            from l in context.Locations
+            join dl in context.DepartmentLocations on l.Id equals dl.LocationId
+            where dl.DepartmentId == id
+            select l).ToListAsync(cancellationToken);
+
+        return result;
+    }
+
     public async Task<Result<Location>> CreateAsync(
         Location entity, CancellationToken cancellationToken = default)
     {

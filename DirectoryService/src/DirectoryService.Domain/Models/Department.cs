@@ -80,6 +80,20 @@ public class Department
         return this;
     }
 
+    public Department Deactivate()
+    {
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+        return this;
+    }
+
+    public Department Activate()
+    {
+        IsActive = true;
+        UpdatedAt = DateTime.UtcNow;
+        return this;
+    }
+
     public static short CalculateDepth(string path) =>
         (short)(path.Length - path.Replace(".", string.Empty).Length);
 

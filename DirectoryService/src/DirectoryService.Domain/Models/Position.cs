@@ -37,6 +37,20 @@ public class Position
         return this;
     }
 
+    public Position Deactivate()
+    {
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+        return this;
+    }
+
+    public Position Activate()
+    {
+        IsActive = true;
+        UpdatedAt = DateTime.UtcNow;
+        return this;
+    }
+
     // EF Core
     private Position() { }
 

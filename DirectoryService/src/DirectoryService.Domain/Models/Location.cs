@@ -45,6 +45,20 @@ public class Location
         return this;
     }
 
+    public Location Deactivate()
+    {
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+        return this;
+    }
+
+    public Location Activate()
+    {
+        IsActive = true;
+        UpdatedAt = DateTime.UtcNow;
+        return this;
+    }
+
     // EF Core
     private Location() { }
 

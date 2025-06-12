@@ -1,4 +1,5 @@
 using DirectoryService.Application.Commands.LocationManagement.CreateLocation;
+using DirectoryService.Application.Commands.LocationManagement.SoftDeleteLocation;
 using DirectoryService.Application.Commands.LocationManagement.UpdateLocation;
 using DirectoryService.Application.Shared.DTOs;
 using DirectoryService.Presentation.Requests;
@@ -23,4 +24,11 @@ public class LocationsController : ApplicationController
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default) =>
         await handler.Handle(request.ToCommand(id), cancellationToken);
+
+    [HttpDelete("{id:guid}")]
+    public async Task<EndpointResult<Guid>> Update(
+        [FromServices] SoftDeleteLocationHandler handler,
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(new SoftDeleteLocationCommand(id), cancellationToken);
 }
