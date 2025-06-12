@@ -62,7 +62,20 @@ public class DepartmentRepository(ApplicationDBContext context) : IDepartmentRep
         return result;
     }
 
-    public async Task<UnitResult<Error>> UpdateChildrenPathAsync(
+    public async Task<Result<IEnumerable<Department>>> GetChildrenByPathAsync(
+        LTree path,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await context.Departments
+            .Where(d => d.IsActive)
+            .Where(d => d.Path.IsDescendantOf(path))
+            .Where(d => d.Path != path)
+            .ToListAsync(cancellationToken);
+
+        return result;
+    }
+
+    public async Task<Result<int, Error>> UpdateChildrenPathAsync(
         LTree oldPath, short oldPathDepth,
         LTree newPath, short newPathDepth,
         CancellationToken cancellationToken = default)
@@ -73,7 +86,7 @@ public class DepartmentRepository(ApplicationDBContext context) : IDepartmentRep
             // UPDATE item
             // SET path = NEW.path || subpath(path, nlevel(OLD.path))
             // WHERE path<@ OLD.path;
-            await context.Departments
+            var changedCount = await context.Departments
                 .Where(d => d.IsActive)
                 .Where(d => d.Path.IsDescendantOf(oldPath))
                 .Where(d => d.Path != newPath)
@@ -87,11 +100,24 @@ public class DepartmentRepository(ApplicationDBContext context) : IDepartmentRep
                             d => d.Path.NLevel - 1 - oldPathDepth + newPathDepth),  // d.Path.NLevel - 1 won't work, because it will not be updated yet
                     cancellationToken);
 
-            return UnitResult.Success<Error>();
+            return changedCount;
         }
         catch (DbUpdateConcurrencyException)
         {
             return Errors.General.Failure($"ConcurrentUpdateFailed {oldPath}");
         }
+    }
+
+    public async Task<Result<IEnumerable<Department>>> GetDepartmentsForLocationAsync(
+        Id<Location> id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await (
+            from d in context.Departments
+            join dl in context.DepartmentLocations on d.Id equals dl.DepartmentId
+            where dl.LocationId == id
+            select d).ToListAsync(cancellationToken);
+
+        return result;
     }
 }
