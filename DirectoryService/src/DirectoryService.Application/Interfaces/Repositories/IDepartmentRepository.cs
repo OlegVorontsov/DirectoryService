@@ -27,8 +27,16 @@ public interface IDepartmentRepository
     Task<Result<IEnumerable<Department>>> GetFlatTreeAsync(
         LTree path, CancellationToken cancellationToken = default);
 
-    Task<UnitResult<Error>> UpdateChildrenPathAsync(
+    public Task<Result<IEnumerable<Department>>> GetChildrenByPathAsync(
+        LTree path,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<int, Error>> UpdateChildrenPathAsync(
         LTree oldPath, short oldPathDepth,
         LTree newPath, short newPathDepth,
+        CancellationToken cancellationToken = default);
+
+    public Task<Result<IEnumerable<Department>>> GetDepartmentsForLocationAsync(
+        Id<Location> id,
         CancellationToken cancellationToken = default);
 }
