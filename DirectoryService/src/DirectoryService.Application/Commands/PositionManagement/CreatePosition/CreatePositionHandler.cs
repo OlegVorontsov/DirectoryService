@@ -15,7 +15,8 @@ namespace DirectoryService.Application.Commands.PositionManagement.CreatePositio
 public class CreatePositionHandler(
     IValidator<CreatePositionCommand> validator,
     ILogger<CreatePositionHandler> logger,
-    IPositionRepository positionRepository)
+    IPositionRepository positionRepository,
+    IDepartmentRepository departmentRepository)
     : ICommandHandler<PositionDTO, CreatePositionCommand>
 {
     public async Task<Result<PositionDTO, ErrorList>> Handle(
@@ -32,22 +33,33 @@ public class CreatePositionHandler(
         if (isNameUnique.IsFailure)
             return isNameUnique.Error.ToErrors();
 
-        var createResult = await positionRepository.CreateAsync(
-            entity: Position.Create(
+        // validate departments
+        var departmentIds = command.DepartmentIds.Select(Id<Department>.Create);
+        var areLocationsValidResult = await departmentRepository.AreDepartmentsValidAsync(
+            departmentIds,
+            cancellationToken);
+        if (areLocationsValidResult.IsFailure)
+            return areLocationsValidResult.Error.ToErrors();
+
+        var entity = Position.Create(
                 id: Id<Position>.GenerateNew(),
                 name: name,
                 description: PositionDescription.Create(command.Description).Value,
-                createdAt: DateTime.UtcNow).Value!,
-            cancellationToken: cancellationToken);
+                createdAt: DateTime.UtcNow).Value;
 
-        if (createResult.IsFailure)
-            return Errors.General.Failure(createResult.Error).ToErrors();
+        entity.UpdateDepartments(departmentIds);
+
+        var result = await positionRepository.CreateAsync(
+            entity, cancellationToken);
+
+        if (result.IsFailure)
+            return Errors.General.Failure(result.Error).ToErrors();
 
         logger.LogInformation(
             "Position created with id {0} name {1}",
-            createResult.Value.Id.Value,
-            createResult.Value.Name.Value);
+            result.Value.Id.Value,
+            result.Value.Name.Value);
 
-        return PositionDTO.FromDomainEntity(createResult.Value);
+        return PositionDTO.FromDomainEntity(result.Value);
     }
 }

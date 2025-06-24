@@ -3,12 +3,13 @@ using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Domain.Models;
 using DirectoryService.Domain.Shared.BaseClasses;
 using DirectoryService.Domain.ValueObjects.PositionValueObjects;
+using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Infrastructure.DataBase.Repositories;
 
-public class PositionRepository(ApplicationDBContext context) : IPositionRepository
+public class PositionRepository(ApplicationWriteDBContext context) : IPositionRepository
 {
     public async Task<Result<Position, Error>> GetByIdAsync(
         Id<Position> id,
@@ -45,8 +46,21 @@ public class PositionRepository(ApplicationDBContext context) : IPositionReposit
 
     public async Task<Result<Position>> UpdateAsync(
         Position entity,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IEnumerable<DepartmentPosition>? oldDepartmentPositions = null)
     {
+        // sync DepartmentPositions
+        if (oldDepartmentPositions is not null)
+        {
+            foreach (var item in oldDepartmentPositions)
+            {
+                var found = entity.DepartmentPositions
+                    .FirstOrDefault(d => d.PositionId == item.PositionId);
+                if (found is null)
+                    context.DepartmentPositions.Remove(item);
+            }
+        }
+
         await context.SaveChangesAsync(cancellationToken);
 
         return entity;

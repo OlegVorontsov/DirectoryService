@@ -15,7 +15,7 @@ public class Location
     public DateTime UpdatedAt { get; private set; }
 
     private List<DepartmentLocation> _departmentLocations = [];
-    public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations.ToList();
+    public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations.AsReadOnly();
 
     public static Result<Location> Create(
         Id<Location> id,

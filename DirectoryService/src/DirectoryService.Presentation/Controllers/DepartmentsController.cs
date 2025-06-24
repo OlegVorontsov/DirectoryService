@@ -1,6 +1,8 @@
 using DirectoryService.Application.Commands.DepartmentManagement.CreateDepartment;
 using DirectoryService.Application.Commands.DepartmentManagement.SoftDeleteDepartment;
 using DirectoryService.Application.Commands.DepartmentManagement.UpdateDepartment;
+using DirectoryService.Application.Queries.DepartmentManagement.GetChildrenDepartments;
+using DirectoryService.Application.Queries.DepartmentManagement.GetRootDepartments;
 using DirectoryService.Application.Shared.DTOs;
 using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -31,4 +33,19 @@ public class DepartmentsController : ApplicationController
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default) =>
         await handler.Handle(new SoftDeleteDepartmentCommand(id), cancellationToken);
+
+    [HttpGet("roots")]
+    public async Task<EndpointResult<FilteredListDTO<DepartmentTreeDTO>>> GetRoots(
+        [FromServices] GetRootDepartmentsHandler handler,
+        [FromQuery] GetRootDepartmentsQuery query,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(query, cancellationToken);
+
+    [HttpGet("{id:guid}/children")]
+    public async Task<EndpointResult<FilteredListDTO<DepartmentDTO>>> GetChildren(
+        [FromServices] GetChildrenDepartmentsHandler handler,
+        [FromRoute] Guid id,
+        [FromQuery] GetChildrenDepartmentsRequest request,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(request.ToQuery(id), cancellationToken);
 }

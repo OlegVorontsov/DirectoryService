@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
+      <PackageReference Include="Dapper" Version="2.1.66" />
       <PackageReference Include="SharedService.Core" Version="1.0.2" />
       <PackageReference Include="SharedService.Framework" Version="1.0.2" />
       <PackageReference Include="SharedService.SharedKernel" Version="1.0.2" />

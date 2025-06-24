@@ -22,7 +22,8 @@ public interface IPositionRepository
 
     Task<Result<Position>> UpdateAsync(
         Position entity,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        IEnumerable<DepartmentPosition>? oldDepartmentPositions = null);
 
     Task<UnitResult<Error>> IsNameUniqueAsync(
         PositionName name,

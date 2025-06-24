@@ -5,4 +5,5 @@ namespace DirectoryService.Application.Commands.PositionManagement.UpdatePositio
 public record UpdatePositionCommand(
     Guid Id,
     string Name,
-    string Description) : ICommand;
+    string Description,
+    IEnumerable<Guid> DepartmentIds) : ICommand;

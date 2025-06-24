@@ -1,15 +1,15 @@
 using DirectoryService.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DirectoryService.Infrastructure.DataBase;
+namespace DirectoryService.Infrastructure.DataBase.Write;
 
-public class ApplicationDBContext : DbContext
+public class ApplicationWriteDBContext : DbContext
 {
     public const string DATABASE_CONFIGURATION = "Database";
 
     private readonly string _connectionString;
 
-    public ApplicationDBContext(
+    public ApplicationWriteDBContext(
         string connectionString)
     {
         _connectionString = connectionString;
@@ -17,6 +17,7 @@ public class ApplicationDBContext : DbContext
 
     public DbSet<Department> Departments { get; set; }
     public DbSet<DepartmentLocation> DepartmentLocations { get; set; }
+    public DbSet<DepartmentPosition> DepartmentPositions { get; set; }
     public DbSet<Location> Locations { get; set; }
     public DbSet<Position> Positions { get; set; }
 
@@ -37,7 +38,7 @@ public class ApplicationDBContext : DbContext
         modelBuilder.HasPostgresExtension("ltree");  // used in entities: Department
 
         modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(ApplicationDBContext).Assembly,
+            typeof(ApplicationWriteDBContext).Assembly,
             type => type.FullName?.Contains("DataBase.Configurations") ?? false);
 
         base.OnModelCreating(modelBuilder);
