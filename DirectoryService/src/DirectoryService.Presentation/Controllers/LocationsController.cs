@@ -1,10 +1,10 @@
-using DirectoryService.Application.Commands.LocationManagement.CreateLocation;
-using DirectoryService.Application.Commands.LocationManagement.SoftDeleteLocation;
-using DirectoryService.Application.Commands.LocationManagement.UpdateLocation;
-using DirectoryService.Application.Queries.LocationManagement.GetLocationById;
-using DirectoryService.Application.Queries.LocationManagement.GetLocations;
+using DirectoryService.Application.Commands.Locations.CreateLocation;
+using DirectoryService.Application.Commands.Locations.SoftDeleteLocation;
+using DirectoryService.Application.Commands.Locations.UpdateLocation;
+using DirectoryService.Application.Queries.Locations.GetLocationById;
+using DirectoryService.Application.Queries.Locations.GetLocations;
 using DirectoryService.Application.Shared.DTOs;
-using DirectoryService.Presentation.Requests;
+using DirectoryService.Contracts.Requests;
 using Microsoft.AspNetCore.Mvc;
 using SharedService.Framework.EndpointResults;
 

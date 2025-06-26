@@ -1,8 +1,8 @@
-using DirectoryService.Application.Commands.PositionManagement.CreatePosition;
-using DirectoryService.Application.Commands.PositionManagement.SoftDeletePosition;
-using DirectoryService.Application.Commands.PositionManagement.UpdatePosition;
+using DirectoryService.Application.Commands.Positions.CreatePosition;
+using DirectoryService.Application.Commands.Positions.SoftDeletePosition;
+using DirectoryService.Application.Commands.Positions.UpdatePosition;
 using DirectoryService.Application.Shared.DTOs;
-using DirectoryService.Presentation.Requests;
+using DirectoryService.Contracts.Requests;
 using Microsoft.AspNetCore.Mvc;
 using SharedService.Framework.EndpointResults;
 

@@ -1,10 +1,10 @@
-using DirectoryService.Application.Commands.DepartmentManagement.CreateDepartment;
-using DirectoryService.Application.Commands.DepartmentManagement.SoftDeleteDepartment;
-using DirectoryService.Application.Commands.DepartmentManagement.UpdateDepartment;
-using DirectoryService.Application.Queries.DepartmentManagement.GetChildrenDepartments;
-using DirectoryService.Application.Queries.DepartmentManagement.GetRootDepartments;
+using DirectoryService.Application.Commands.Departments.CreateDepartment;
+using DirectoryService.Application.Commands.Departments.SoftDeleteDepartment;
+using DirectoryService.Application.Commands.Departments.UpdateDepartment;
+using DirectoryService.Application.Queries.Departments.GetChildrenDepartments;
+using DirectoryService.Application.Queries.Departments.GetRootDepartments;
 using DirectoryService.Application.Shared.DTOs;
-using DirectoryService.Presentation.Requests;
+using DirectoryService.Contracts.Requests;
 using Microsoft.AspNetCore.Mvc;
 using SharedService.Framework.EndpointResults;
 

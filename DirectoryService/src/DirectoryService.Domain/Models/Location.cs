@@ -1,6 +1,6 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Shared.BaseClasses;
-using DirectoryService.Domain.ValueObjects.LocationValueObjects;
+using DirectoryService.Domain.ValueObjects.Locations;
 
 namespace DirectoryService.Domain.Models;
 

@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Shared.BaseClasses;
-using DirectoryService.Domain.ValueObjects.DepartmentValueObjects;
+using DirectoryService.Domain.ValueObjects.Departments;
 using Microsoft.EntityFrameworkCore;
 using SharedService.SharedKernel.Errors;
 
