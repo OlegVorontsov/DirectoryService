@@ -1,6 +1,8 @@
 using DirectoryService.Application.Commands.LocationManagement.CreateLocation;
 using DirectoryService.Application.Commands.LocationManagement.SoftDeleteLocation;
 using DirectoryService.Application.Commands.LocationManagement.UpdateLocation;
+using DirectoryService.Application.Queries.LocationManagement.GetLocationById;
+using DirectoryService.Application.Queries.LocationManagement.GetLocations;
 using DirectoryService.Application.Shared.DTOs;
 using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -31,4 +33,18 @@ public class LocationsController : ApplicationController
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default) =>
         await handler.Handle(new SoftDeleteLocationCommand(id), cancellationToken);
+
+    [HttpGet]
+    public async Task<EndpointResult<FilteredListDTO<LocationDTO>>> GetAll(
+        [FromServices] GetLocationsHandler handler,
+        [FromQuery] GetLocationsQuery query,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(query, cancellationToken);
+
+    [HttpGet("{id:guid}")]
+    public async Task<EndpointResult<LocationDTO>> Get(
+        [FromServices] GetLocationByIdHandler handler,
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(new GetLocationByIdQuery(id), cancellationToken);
 }

@@ -1,4 +1,4 @@
-using DirectoryService.Infrastructure.DataBase;
+using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore;
 using SharedService.Framework.Middlewares;
 
@@ -30,7 +30,7 @@ public static class AppConfiguration
     private static async Task ApplyMigrations(this WebApplication application)
     {
         await using var scope = application.Services.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationWriteDBContext>();
         await dbContext.Database.MigrateAsync();
     }
 }

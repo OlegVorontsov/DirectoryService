@@ -1,11 +1,12 @@
 using System.Data;
 using DirectoryService.Application.Interfaces.DataBase;
+using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DirectoryService.Infrastructure.DataBase;
 
 public class DirectoryServiceUnitOfWork(
-    ApplicationDBContext context) : IUnitOfWork
+    ApplicationWriteDBContext context) : IUnitOfWork
 {
     public async Task<IDbTransaction> BeginTransactionAsync(
         CancellationToken cancellationToken = default)

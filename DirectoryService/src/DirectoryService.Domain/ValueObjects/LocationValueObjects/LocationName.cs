@@ -21,6 +21,9 @@ public class LocationName
         return new LocationName(value);
     }
 
+    public static explicit operator string(LocationName locationName) =>
+        locationName.Value;
+
     private LocationName(string value)
     {
         Value = value;

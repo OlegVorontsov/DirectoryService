@@ -3,12 +3,13 @@ using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Domain.Models;
 using DirectoryService.Domain.Shared.BaseClasses;
 using DirectoryService.Domain.ValueObjects.DepartmentValueObjects;
+using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Infrastructure.DataBase.Repositories;
 
-public class DepartmentRepository(ApplicationDBContext context) : IDepartmentRepository
+public class DepartmentRepository(ApplicationWriteDBContext context) : IDepartmentRepository
 {
     public async Task<Result<Department>> CreateAsync(
         Department entity, CancellationToken cancellationToken = default)
@@ -119,5 +120,23 @@ public class DepartmentRepository(ApplicationDBContext context) : IDepartmentRep
             select d).ToListAsync(cancellationToken);
 
         return result;
+    }
+
+    public async Task<UnitResult<Error>> AreDepartmentsValidAsync(
+        IEnumerable<Id<Department>> departmentIds,
+        CancellationToken cancellationToken = default)
+    {
+        var existingIds = await context.Departments
+            .Where(d => departmentIds.Contains(d.Id))
+            .Select(d => d.Id)
+            .ToListAsync(cancellationToken);
+
+        foreach (var id in existingIds)
+        {
+            if (departmentIds.FirstOrDefault(id) is null)
+                return Errors.General.NotFound(id.Value);
+        }
+
+        return UnitResult.Success<Error>();
     }
 }

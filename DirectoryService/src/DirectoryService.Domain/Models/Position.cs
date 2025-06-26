@@ -12,6 +12,8 @@ public class Position
     public bool IsActive { get; private set; } = true;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    private List<DepartmentPosition> _departmentPositions = [];
+    public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions.AsReadOnly();
 
     public static Result<Position> Create(
         Id<Position> id,
@@ -35,6 +37,28 @@ public class Position
         UpdatedAt = DateTime.UtcNow;
 
         return this;
+    }
+
+    public Position UpdateDepartments(
+        IEnumerable<Id<Department>> departmentIds)
+    {
+        _departmentPositions = departmentIds.Select(did => new DepartmentPosition(did, Id)).ToList();
+
+        return this;
+    }
+
+    public bool AreDepartmentsChanged(IEnumerable<Guid> departmentIds)
+    {
+        if (DepartmentPositions.Count != departmentIds.Count())
+            return true;
+
+        for (int i = 0; i < DepartmentPositions.Count; i++)
+        {
+            if (DepartmentPositions[i].DepartmentId.Value != departmentIds.ElementAt(i))
+                return true;
+        }
+
+        return false;
     }
 
     public Position Deactivate()

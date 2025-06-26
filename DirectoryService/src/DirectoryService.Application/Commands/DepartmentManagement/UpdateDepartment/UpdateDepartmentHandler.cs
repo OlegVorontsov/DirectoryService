@@ -103,33 +103,7 @@ public class UpdateDepartmentHandler(
 
         var oldParent = entity.Parent;
         var oldPath = entity.Path;
-        var oldLocations = entity.DepartmentLocations;
-
-        // update old parent if not null
-        if (isParentChanged && oldParent is not null)
-        {
-            oldParent.DecreaseChildrenCount();
-            var oldParentUpdateResult = await departmentRepository
-                .UpdateAsync(oldParent, cancellationToken);
-            if (oldParentUpdateResult.IsFailure)
-            {
-                transaction.Rollback();
-                return Errors.General.Failure(oldParentUpdateResult.Error).ToErrors();
-            }
-        }
-
-        // update new parent if not null
-        if (isParentChanged && newParent is not null)
-        {
-            newParent.IncreaseChildrenCount();
-            var newParentUpdateResult = await departmentRepository
-                .UpdateAsync(newParent, cancellationToken);
-            if (newParentUpdateResult.IsFailure)
-            {
-                transaction.Rollback();
-                return Errors.General.Failure(newParentUpdateResult.Error).ToErrors();
-            }
-        }
+        var oldLocations = entity.DepartmentLocations;  
 
         // update entity
         if (isNameChanged || isParentChanged)
@@ -157,6 +131,30 @@ public class UpdateDepartmentHandler(
             {
                 transaction.Rollback();
                 return Errors.General.Failure(entityUpdateResult.Error).ToErrors();
+            }
+        }
+
+        // update old parent if not null
+        if (isParentChanged && oldParent is not null)
+        {
+            oldParent.DecreaseChildrenCount();
+            var oldParentUpdateResult = await departmentRepository.UpdateAsync(oldParent, cancellationToken);
+            if (oldParentUpdateResult.IsFailure)
+            {
+                transaction.Rollback();
+                return Errors.General.Failure(oldParentUpdateResult.Error).ToErrors();
+            }
+        }
+
+        // update new parent if not null
+        if (isParentChanged && newParent is not null)
+        {
+            newParent.IncreaseChildrenCount();
+            var newParentUpdateResult = await departmentRepository.UpdateAsync(newParent, cancellationToken);
+            if (newParentUpdateResult.IsFailure)
+            {
+                transaction.Rollback();
+                return Errors.General.Failure(newParentUpdateResult.Error).ToErrors();
             }
         }
 

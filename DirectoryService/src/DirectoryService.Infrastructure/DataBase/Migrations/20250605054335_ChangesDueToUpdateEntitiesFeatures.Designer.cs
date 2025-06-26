@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using DirectoryService.Infrastructure.DataBase;
+using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -12,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DirectoryService.Infrastructure.DataBase.Migrations
 {
-    [DbContext(typeof(ApplicationDBContext))]
+    [DbContext(typeof(ApplicationWriteDBContext))]
     [Migration("20250605054335_ChangesDueToUpdateEntitiesFeatures")]
     partial class ChangesDueToUpdateEntitiesFeatures
     {

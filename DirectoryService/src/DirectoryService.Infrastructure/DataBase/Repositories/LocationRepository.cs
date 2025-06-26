@@ -3,13 +3,14 @@ using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Domain.Models;
 using DirectoryService.Domain.Shared.BaseClasses;
 using DirectoryService.Domain.ValueObjects.LocationValueObjects;
+using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Infrastructure.DataBase.Repositories;
 
 public class LocationRepository(
-    ApplicationDBContext context) : ILocationRepository
+    ApplicationWriteDBContext context) : ILocationRepository
 {
     public async Task<Result<Location, Error>> GetByIdAsync(
         Id<Location> id,
@@ -33,6 +34,25 @@ public class LocationRepository(
             return Errors.General.NotFound();
 
         return entity;
+    }
+
+    public async Task<Result<(int TotalCount, IEnumerable<Location> Values)>> GetAsync(
+        Func<IQueryable<Location>, IQueryable<Location>> filterQuery,
+        int Page,
+        int PageSize,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<Location> set = context.Locations;
+        if (filterQuery is not null)
+            set = filterQuery(set);
+
+        var totalCount = await set.CountAsync(cancellationToken);
+
+        var result = await set
+            .Skip((Page - 1) * PageSize).Take(PageSize)
+            .ToListAsync(cancellationToken);
+
+        return (totalCount, result);
     }
 
     public async Task<Result<IEnumerable<Location>>> GetLocationsForDepartmentAsync(
@@ -75,6 +95,21 @@ public class LocationRepository(
         return existingLocation is null ?
             UnitResult.Success<Error>() :
             Errors.General.AlreadyExists(name.Value);
+    }
+
+    public async Task<UnitResult<Error>> IsAddressUniqueAsync(
+        LocationAddress address,
+        CancellationToken cancellationToken = default)
+    {
+        var existingLocation = await context.Locations
+            .FirstOrDefaultAsync(d => d.Address.City == address.City &&
+                                      d.Address.Street == address.Street &&
+                                      d.Address.HouseNumber == address.HouseNumber, cancellationToken);
+
+        if (existingLocation is not null)
+            return Errors.General.AlreadyExists($"{address.City} {address.Street} {address.HouseNumber}");
+
+        return UnitResult.Success<Error>();
     }
 
     public async Task<UnitResult<Error>> AreLocationsValidAsync(

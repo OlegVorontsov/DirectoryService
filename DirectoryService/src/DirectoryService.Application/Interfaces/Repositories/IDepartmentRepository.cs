@@ -39,4 +39,8 @@ public interface IDepartmentRepository
     public Task<Result<IEnumerable<Department>>> GetDepartmentsForLocationAsync(
         Id<Location> id,
         CancellationToken cancellationToken = default);
+
+    public Task<UnitResult<Error>> AreDepartmentsValidAsync(
+        IEnumerable<Id<Department>> departmentIds,
+        CancellationToken cancellationToken = default);
 }

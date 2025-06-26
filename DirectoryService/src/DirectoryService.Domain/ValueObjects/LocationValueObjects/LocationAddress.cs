@@ -3,7 +3,7 @@ using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Domain.ValueObjects.LocationValueObjects;
 
-public class LocationAddress : IComparable<LocationAddress>
+public class LocationAddress : IComparable<LocationAddress>, IEquatable<LocationAddress>
 {
     public const int CITY_MAX_LENGTH = 100;
     public const int STREET_MAX_LENGTH = 100;
@@ -42,6 +42,20 @@ public class LocationAddress : IComparable<LocationAddress>
             return Errors.General.ValueIsInvalid(nameof(LocationAddress));
 
         return new LocationAddress(city, street, houseNumber);
+    }
+
+    public bool Equals(LocationAddress? other)
+    {
+        if (other is null)
+            return false;
+        return City == other.City && Street == other.Street && HouseNumber == other.HouseNumber;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is LocationAddress other)
+            return Equals(other);
+        return false;
     }
 
     public int CompareTo(LocationAddress? other)

@@ -15,7 +15,8 @@ namespace DirectoryService.Application.Commands.PositionManagement.UpdatePositio
 public class UpdatePositionHandler(
     IValidator<UpdatePositionCommand> validator,
     ILogger<UpdatePositionHandler> logger,
-    IPositionRepository positionRepository)
+    IPositionRepository positionRepository,
+    IDepartmentRepository departmentRepository)
     : ICommandHandler<PositionDTO, UpdatePositionCommand>
 {
     public async Task<Result<PositionDTO, ErrorList>> Handle(
@@ -37,18 +38,59 @@ public class UpdatePositionHandler(
 
         // check if new name is unique
         var name = PositionName.Create(command.Name).Value;
-        if (entity.Name != name)
+        var isNameChanged = entity.Name != name;
+        if (isNameChanged)
         {
             var isNameUnique = await positionRepository.IsNameUniqueAsync(name, cancellationToken);
             if (isNameUnique.IsFailure)
                 return isNameUnique.Error.ToErrors();
         }
 
-        entity.Update(
-            name: name,
-            description: PositionDescription.Create(command.Description).Value);
+        var description = PositionDescription.Create(command.Description).Value;
+        var isDescriptionChanged = entity.Description != description;
 
-        var updateResult = await positionRepository.UpdateAsync(entity, cancellationToken);
+        // validate positions
+        var areDepartmentsChanged = entity.AreDepartmentsChanged(command.DepartmentIds);
+        if (areDepartmentsChanged)
+        {
+            var departmentIds = command.DepartmentIds.Select(Id<Department>.Create);
+            var areDepartmentsValidResult = await departmentRepository.AreDepartmentsValidAsync(
+                departmentIds,
+                cancellationToken);
+            if (areDepartmentsValidResult.IsFailure)
+                return areDepartmentsValidResult.Error.ToErrors();
+        }
+
+        if ((isNameChanged || isDescriptionChanged || areDepartmentsChanged) == false)
+        {
+            logger.LogInformation(
+                "Position with id {id} was unchanged, because request didn't have any changes",
+                entity.Id);
+            return PositionDTO.FromDomainEntity(entity);
+        }
+
+        if (isNameChanged)
+        {
+            entity.Update(
+                name: name,
+                description: entity.Description);
+        }
+
+        if (isDescriptionChanged)
+        {
+            entity.Update(
+                name: entity.Name,
+                description: description);
+        }
+
+        var oldDepartments = entity.DepartmentPositions;
+        if (areDepartmentsChanged)
+            entity.UpdateDepartments(command.DepartmentIds.Select(Id<Department>.Create));
+
+        var updateResult = await positionRepository.UpdateAsync(
+            entity,
+            cancellationToken,
+            oldDepartments);
         if (updateResult.IsFailure)
             return Errors.General.Failure("Failed to update position").ToErrors();
 
