@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
 using DirectoryService.Domain.Models;
-using DirectoryService.Domain.ValueObjects.DepartmentValueObjects;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

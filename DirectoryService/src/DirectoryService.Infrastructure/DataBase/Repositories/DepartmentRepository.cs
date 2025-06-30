@@ -2,7 +2,6 @@ using CSharpFunctionalExtensions;
 using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Domain.Models;
 using DirectoryService.Domain.Shared.BaseClasses;
-using DirectoryService.Domain.ValueObjects.DepartmentValueObjects;
 using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore;
 using SharedService.SharedKernel.Errors;

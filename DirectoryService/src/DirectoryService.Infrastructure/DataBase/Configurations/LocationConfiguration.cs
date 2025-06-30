@@ -1,6 +1,6 @@
 using DirectoryService.Domain.Models;
 using DirectoryService.Domain.Shared.BaseClasses;
-using DirectoryService.Domain.ValueObjects.LocationValueObjects;
+using DirectoryService.Domain.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
