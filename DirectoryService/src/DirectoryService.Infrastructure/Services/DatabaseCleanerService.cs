@@ -1,12 +1,12 @@
 using System.Data;
 using Dapper;
 using DirectoryService.Application.Interfaces.Repositories;
-using DirectoryService.Application.Shared.Interfaces;
 using DirectoryService.Infrastructure.DataBase.Write;
-using DirectoryService.Infrastructure.Intefraces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SharedService.Core.BackgroundServices.Intefraces;
+using SharedService.Core.Database.Intefraces;
 
 namespace DirectoryService.Infrastructure.Services;
 

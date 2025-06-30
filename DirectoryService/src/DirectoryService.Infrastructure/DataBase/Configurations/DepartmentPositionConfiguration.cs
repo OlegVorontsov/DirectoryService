@@ -1,7 +1,7 @@
 using DirectoryService.Domain.Models;
-using DirectoryService.Domain.Shared.BaseClasses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SharedService.SharedKernel.BaseClasses;
 
 namespace DirectoryService.Infrastructure.DataBase.Configurations;
 

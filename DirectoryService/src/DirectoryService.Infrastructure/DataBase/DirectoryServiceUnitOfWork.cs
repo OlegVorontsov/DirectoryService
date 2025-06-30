@@ -1,7 +1,7 @@
 using System.Data;
-using DirectoryService.Application.Interfaces.DataBase;
 using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore.Storage;
+using SharedService.Core.Database.Intefraces;
 
 namespace DirectoryService.Infrastructure.DataBase;
 

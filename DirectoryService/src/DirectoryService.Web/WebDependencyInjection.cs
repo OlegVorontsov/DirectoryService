@@ -1,4 +1,3 @@
-using System.Reflection;
 using Serilog;
 using Serilog.Events;
 

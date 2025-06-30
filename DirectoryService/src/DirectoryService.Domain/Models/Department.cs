@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
-using DirectoryService.Domain.Shared.BaseClasses;
 using DirectoryService.Domain.ValueObjects.Departments;
 using Microsoft.EntityFrameworkCore;
+using SharedService.SharedKernel.BaseClasses;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Domain.Models;

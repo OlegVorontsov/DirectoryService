@@ -1,4 +1,4 @@
-using DirectoryService.Domain.Shared.BaseClasses;
+using SharedService.SharedKernel.BaseClasses;
 
 namespace DirectoryService.Domain.Models;
 

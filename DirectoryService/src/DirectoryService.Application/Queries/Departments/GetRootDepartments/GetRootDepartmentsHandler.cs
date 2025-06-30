@@ -1,12 +1,13 @@
 using CSharpFunctionalExtensions;
 using Dapper;
-using DirectoryService.Application.Shared.Database;
 using DirectoryService.Application.Shared.DTOs;
-using DirectoryService.Application.Shared.Extensions;
-using DirectoryService.Application.Shared.Interfaces;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedService.Core.Abstractions;
+using SharedService.Core.Database.Builders;
+using SharedService.Core.Database.Extensions;
+using SharedService.Core.Database.Intefraces;
+using SharedService.Core.DTOs;
 using SharedService.Core.Validation;
 using SharedService.SharedKernel.Errors;
 
