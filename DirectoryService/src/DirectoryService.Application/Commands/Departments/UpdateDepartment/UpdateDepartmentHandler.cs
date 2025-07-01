@@ -1,15 +1,15 @@
 ﻿using CSharpFunctionalExtensions;
-using DirectoryService.Application.Interfaces.DataBase;
 using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Application.Shared.DTOs;
 using DirectoryService.Domain.Models;
-using DirectoryService.Domain.Shared.BaseClasses;
 using DirectoryService.Domain.ValueObjects.Departments;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedService.Core.Abstractions;
+using SharedService.Core.Database.Intefraces;
 using SharedService.Core.Validation;
+using SharedService.SharedKernel.BaseClasses;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Application.Commands.Departments.UpdateDepartment;
@@ -103,7 +103,7 @@ public class UpdateDepartmentHandler(
 
         var oldParent = entity.Parent;
         var oldPath = entity.Path;
-        var oldLocations = entity.DepartmentLocations;  
+        var oldLocations = entity.DepartmentLocations;
 
         // update entity
         if (isNameChanged || isParentChanged)

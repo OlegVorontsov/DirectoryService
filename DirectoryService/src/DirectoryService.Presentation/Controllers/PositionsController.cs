@@ -4,6 +4,7 @@ using DirectoryService.Application.Commands.Positions.UpdatePosition;
 using DirectoryService.Application.Shared.DTOs;
 using DirectoryService.Contracts.Requests;
 using Microsoft.AspNetCore.Mvc;
+using SharedService.Framework;
 using SharedService.Framework.EndpointResults;
 
 namespace DirectoryService.Presentation.Controllers;

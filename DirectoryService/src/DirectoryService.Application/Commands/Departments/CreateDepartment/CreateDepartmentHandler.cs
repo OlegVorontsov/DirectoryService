@@ -1,14 +1,14 @@
 using CSharpFunctionalExtensions;
-using DirectoryService.Application.Interfaces.DataBase;
 using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Application.Shared.DTOs;
 using DirectoryService.Domain.Models;
-using DirectoryService.Domain.Shared.BaseClasses;
 using DirectoryService.Domain.ValueObjects.Departments;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedService.Core.Abstractions;
+using SharedService.Core.Database.Intefraces;
 using SharedService.Core.Validation;
+using SharedService.SharedKernel.BaseClasses;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Application.Commands.Departments.CreateDepartment;

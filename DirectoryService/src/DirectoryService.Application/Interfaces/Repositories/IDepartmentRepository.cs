@@ -1,7 +1,7 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Models;
-using DirectoryService.Domain.Shared.BaseClasses;
 using Microsoft.EntityFrameworkCore;
+using SharedService.SharedKernel.BaseClasses;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Application.Interfaces.Repositories;
