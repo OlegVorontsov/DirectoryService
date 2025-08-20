@@ -16,8 +16,10 @@ public class CreateDepartmentValidator : AbstractValidator<CreateDepartmentComma
             .Must(d => d != Guid.Empty)
             .WithError(Errors.General.ValueIsInvalid("ParentId"));
 
-        RuleFor(c => c.LocationIds)
+        RuleForEach(c => c.LocationIds)
+            .NotNull()
             .NotEmpty()
+            .Must(d => d != Guid.Empty)
             .WithError(Errors.General.ValueIsRequired("LocationIds"));
     }
 }

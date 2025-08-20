@@ -30,7 +30,7 @@ public class LocationsController : ApplicationController
         await handler.Handle(request.ToCommand(id), cancellationToken);
 
     [HttpDelete("{id:guid}")]
-    public async Task<EndpointResult<Guid>> Update(
+    public async Task<EndpointResult<Guid>> Delete(
         [FromServices] SoftDeleteLocationHandler handler,
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default) =>

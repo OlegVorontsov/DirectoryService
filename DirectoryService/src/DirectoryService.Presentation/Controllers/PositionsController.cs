@@ -27,7 +27,7 @@ public class PositionsController : ApplicationController
         await handler.Handle(request.ToCommand(id), cancellationToken);
 
     [HttpDelete("{id:guid}")]
-    public async Task<EndpointResult<Guid>> Update(
+    public async Task<EndpointResult<Guid>> Delete(
         [FromServices] SoftDeletePositionHandler handler,
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default) =>

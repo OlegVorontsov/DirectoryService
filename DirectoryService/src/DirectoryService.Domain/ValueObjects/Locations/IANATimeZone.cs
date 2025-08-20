@@ -6,7 +6,7 @@ namespace DirectoryService.Domain.ValueObjects.Locations;
 
 public class IANATimeZone
 {
-    public string Value { get; private set; }
+    public string Value { get; }
 
     public static Result<IANATimeZone, Error> Create(string value)
     {
