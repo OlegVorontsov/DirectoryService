@@ -72,9 +72,8 @@ public class PositionRepository(ApplicationWriteDBContext context) : IPositionRe
         var existingPosition = await context.Positions
             .FirstOrDefaultAsync(d => d.Name == name, cancellationToken);
 
-        if (existingPosition is not null)
-            return Errors.General.AlreadyExists(name.Value);
-
-        return UnitResult.Success<Error>();
+        return existingPosition is not null ?
+            Errors.General.AlreadyExists(name.Value) :
+            UnitResult.Success<Error>();
     }
 }

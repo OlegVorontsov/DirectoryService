@@ -106,10 +106,9 @@ public class LocationRepository(
                                       d.Address.Street == address.Street &&
                                       d.Address.HouseNumber == address.HouseNumber, cancellationToken);
 
-        if (existingLocation is not null)
-            return Errors.General.AlreadyExists($"{address.City} {address.Street} {address.HouseNumber}");
-
-        return UnitResult.Success<Error>();
+        return existingLocation is not null ?
+            Errors.General.AlreadyExists($"{address.City} {address.Street} {address.HouseNumber}") :
+            UnitResult.Success<Error>();
     }
 
     public async Task<UnitResult<Error>> AreLocationsValidAsync(

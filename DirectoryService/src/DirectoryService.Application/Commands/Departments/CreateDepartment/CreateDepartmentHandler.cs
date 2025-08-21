@@ -62,8 +62,7 @@ public class CreateDepartmentHandler(
         var departmentResult = Department.Create(
             id: Id<Department>.GenerateNew(),
             name: name,
-            parent: parent,
-            createdAt: DateTime.UtcNow);
+            parent: parent);
 
         if (departmentResult.IsFailure) return departmentResult.Error.ToErrors();
         var entity = departmentResult.Value;

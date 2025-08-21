@@ -36,8 +36,7 @@ public class Department
     public static Result<Department, Error> Create(
         Id<Department> id,
         DepartmentName name,
-        Department? parent,
-        DateTime createdAt)
+        Department? parent)
     {
         var pathResult = CreatePath(name, parent?.Path);
         if (pathResult.IsFailure) return pathResult.Error;
@@ -49,7 +48,7 @@ public class Department
             path: pathResult.Value,
             depth: CalculateDepth(pathResult.Value),
             childrenCount: 0,
-            createdAt: createdAt);
+            createdAt: DateTime.UtcNow);
     }
 
     public Department Update(

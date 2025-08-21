@@ -8,7 +8,7 @@ public class DepartmentName
     public const int MAX_LENGTH = 150;
     public const int MIN_LENGTH = 3;
 
-    public string Value { get; private set; }
+    public string Value { get; }
 
     public static Result<DepartmentName, Error> Create(string value)
     {

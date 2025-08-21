@@ -88,7 +88,7 @@ public class GetRootDepartmentsHandler(
         return new FilteredListDTO<DepartmentTreeDTO>(
             Page: query.Page,
             Size: query.Size,
-            Total: totalCount,
-            Data: roots);
+            Data: roots,
+            Total: totalCount);
     }
 }

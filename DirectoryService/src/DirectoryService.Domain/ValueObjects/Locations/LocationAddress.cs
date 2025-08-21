@@ -9,9 +9,9 @@ public class LocationAddress : IComparable<LocationAddress>, IEquatable<Location
     public const int STREET_MAX_LENGTH = 100;
     public const int HOUSENUMBER_MAX_LENGTH = 10;
 
-    public string City { get; private set; }
-    public string Street { get; private set; }
-    public string HouseNumber { get; private set; }
+    public string City { get; }
+    public string Street { get; }
+    public string HouseNumber { get; }
 
     // EF Core
     private LocationAddress() { }
