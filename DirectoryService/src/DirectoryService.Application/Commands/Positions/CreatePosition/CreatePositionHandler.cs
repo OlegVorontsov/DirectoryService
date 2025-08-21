@@ -44,8 +44,7 @@ public class CreatePositionHandler(
         var entity = Position.Create(
                 id: Id<Position>.GenerateNew(),
                 name: name,
-                description: PositionDescription.Create(command.Description).Value,
-                createdAt: DateTime.UtcNow).Value;
+                description: PositionDescription.Create(command.Description).Value).Value;
 
         entity.UpdateDepartments(departmentIds);
 

@@ -18,14 +18,12 @@ public class Position
     public static Result<Position> Create(
         Id<Position> id,
         PositionName name,
-        PositionDescription description,
-        DateTime createdAt)
+        PositionDescription description)
     {
         return new Position(
             id,
             name,
-            description,
-            createdAt);
+            description);
     }
 
     public Position Update(
@@ -81,13 +79,12 @@ public class Position
     private Position(
         Id<Position> id,
         PositionName name,
-        PositionDescription description,
-        DateTime createdAt)
+        PositionDescription description)
     {
         Id = id;
         Name = name;
         Description = description;
-        CreatedAt = createdAt;
-        UpdatedAt = CreatedAt;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
