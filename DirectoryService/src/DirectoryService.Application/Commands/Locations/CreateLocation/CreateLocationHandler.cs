@@ -47,8 +47,7 @@ public class CreateLocationHandler(
                 id: Id<Location>.GenerateNew(),
                 name: name,
                 address: address,
-                timeZone: timeZone,
-                createdAt: DateTime.UtcNow).Value!,
+                timeZone: timeZone).Value!,
             cancellationToken: cancellationToken);
 
         if (createResult.IsFailure)

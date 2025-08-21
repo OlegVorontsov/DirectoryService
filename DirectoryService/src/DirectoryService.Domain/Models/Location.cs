@@ -21,15 +21,13 @@ public class Location
         Id<Location> id,
         LocationName name,
         LocationAddress address,
-        IANATimeZone timeZone,
-        DateTime createdAt)
+        IANATimeZone timeZone)
     {
         return new Location(
             id,
             name,
             address,
-            timeZone,
-            createdAt);
+            timeZone);
     }
 
     public Location Update(
@@ -66,14 +64,13 @@ public class Location
         Id<Location> id,
         LocationName name,
         LocationAddress address,
-        IANATimeZone timeZone,
-        DateTime createdAt)
+        IANATimeZone timeZone)
     {
         Id = id;
         Name = name;
         Address = address;
         TimeZone = timeZone;
-        CreatedAt = createdAt;
-        UpdatedAt = CreatedAt;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
