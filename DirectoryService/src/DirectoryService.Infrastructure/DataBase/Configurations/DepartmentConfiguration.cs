@@ -48,9 +48,9 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                .IsRequired()
                .HasColumnName("path");
 
-        builder.HasIndex(d => d.Path);
-               //.IsUnique();
-               //.HasMethod("gist");  // to use ltree's operators
+        builder.HasIndex(d => d.Path)
+               .HasMethod("gist")
+               .HasDatabaseName("idx_departments_path"); // to use ltree's operators
 
         builder.Property(d => d.Depth)
                .IsRequired()

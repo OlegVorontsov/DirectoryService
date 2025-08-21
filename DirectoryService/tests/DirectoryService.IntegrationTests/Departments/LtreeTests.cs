@@ -3,6 +3,7 @@ using DirectoryService.Domain.Models;
 using DirectoryService.Domain.ValueObjects.Departments;
 using DirectoryService.Domain.ValueObjects.Locations;
 using DirectoryService.IntegrationTests.Infrastructure;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using SharedService.SharedKernel.BaseClasses;
 using Xunit.Abstractions;
@@ -29,11 +30,191 @@ public class LtreeTests : DirectoryTestsBase
 
         var recursiveDepartments = await GetHierarchyRecursive("head");
 
-        _testOutputHelper.WriteLine($"Departments count: {recursiveDepartments.Count}");
+        var materializedDepartments = await GetHierarchyLtree("head");
 
-        // var materializedDepartments = await GetHierarchyLtree("root");
+        recursiveDepartments.Should().BeEquivalentTo(materializedDepartments);
+    }
 
-        // recursiveDepartments.Should().BeEquivalentTo(materializedDepartments);
+    [Fact]
+    public async Task GetSiblings()
+    {
+        await InitializeHierarchy();
+
+        var siblings = await GetSiblingsQuery("head.engineering");
+
+        siblings.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task GetDescendantsToDepth()
+    {
+        await InitializeHierarchy();
+
+        var descendants = await GetDescendantsToDepthQuery("head", 2);
+
+        descendants.Should().HaveCount(3);
+    }
+
+    [Fact]
+    public async Task DeleteSubtree()
+    {
+        await InitializeHierarchy();
+
+        var deleted = await DeleteSubtreeQuery("head");
+
+        deleted.Should().Be(5);
+    }
+
+    [Fact]
+    public async Task GetRootsWithFirstNChildren()
+    {
+        await InitializeHierarchy();
+
+        var rootsWithChildren = await GetRootsWithFirstNChildrenQuery(2);
+
+        rootsWithChildren.Should().HaveCount(1);
+        rootsWithChildren[0].Children.Should().HaveCount(2);
+    }
+
+    private async Task<List<DepartmentDto>> GetRootsWithFirstNChildrenQuery(int childrenCount)
+    {
+        const string dapperSql = """
+                                 WITH root_departments AS (
+                                     SELECT d.*
+                                     FROM directory_service.departments d
+                                     WHERE d.parent_id IS NULL
+                                 ),
+                                 children_with_rank AS (
+                                     SELECT c.*,
+                                            ROW_NUMBER() OVER (PARTITION BY c.parent_id ORDER BY c.id) as rn
+                                     FROM directory_service.departments c
+                                     WHERE c.parent_id IN (SELECT id FROM root_departments)
+                                 )
+                                 SELECT rd.id,
+                                        rd.parent_id,
+                                        rd.name,
+                                        rd.depth,
+                                        rd.is_active,
+                                        rd.created_at,
+                                        rd.updated_at
+                                 FROM root_departments rd
+                                 UNION ALL
+                                 SELECT c.id,
+                                        c.parent_id,
+                                        c.name,
+                                        c.depth,
+                                        c.is_active,
+                                        c.created_at,
+                                        c.updated_at
+                                 FROM children_with_rank c
+                                 WHERE c.rn <= @childrenCount
+                                 ORDER BY parent_id NULLS FIRST, id
+                                 """;
+
+        var dbConn = DbContext.Database.GetDbConnection();
+
+        var departmentRaws = (await dbConn.QueryAsync<DepartmentDto>(dapperSql, new
+        {
+            childrenCount
+        })).ToList();
+
+        var departmentsDict = departmentRaws.ToDictionary(x => x.Id);
+        var roots = new List<DepartmentDto>();
+
+        foreach (var row in departmentRaws)
+        {
+            if (row.ParentId.HasValue && departmentsDict.TryGetValue(row.ParentId.Value, out var parent))
+            {
+                parent.Children.Add(departmentsDict[row.Id]);
+            }
+            else
+            {
+                roots.Add(departmentsDict[row.Id]);
+            }
+        }
+
+        return roots;
+    }
+
+    // удаление всех дочерних элементов
+    private async Task<int> DeleteSubtreeQuery(string rootPath)
+    {
+        const string dapperSql = """
+                                 DELETE FROM directory_service.departments
+                                 WHERE path <@ @rootPath::ltree AND path != @rootPath::ltree
+                                 """;
+
+        var dbConn = DbContext.Database.GetDbConnection();
+
+        var affected = await dbConn.ExecuteAsync(dapperSql, new
+        {
+            rootPath
+        });
+
+        return affected;
+    }
+
+    // получить дочерние элементы на определенную глубину
+    private async Task<List<DepartmentDto>> GetDescendantsToDepthQuery(string rootPath, int depth)
+    {
+        const string dapperSql = """
+                                 SELECT id,
+                                     parent_id,
+                                     name,
+                                     depth,
+                                     is_active,
+                                     created_at,
+                                     updated_at
+                                 FROM directory_service.departments
+                                 WHERE path <@ @rootPath::ltree
+                                   AND nlevel(path) > nlevel(@rootPath::ltree)
+                                   AND nlevel(path) <= nlevel(@rootPath::ltree) + @depth
+                                 ORDER BY depth
+                                 """;
+
+        var dbConn = DbContext.Database.GetDbConnection();
+
+        var departmentRaws = (await dbConn.QueryAsync<DepartmentDto>(dapperSql, new
+        {
+            rootPath,
+            depth
+        })).ToList();
+
+        var departmentsDict = departmentRaws.ToDictionary(x => x.Id);
+        var roots = new List<DepartmentDto>();
+
+        foreach (var row in departmentRaws)
+        {
+            if (row.ParentId.HasValue &&
+                departmentsDict.TryGetValue(row.ParentId.Value, out var parent))
+                parent.Children.Add(departmentsDict[row.Id]);
+            else
+                roots.Add(departmentsDict[row.Id]);
+        }
+
+        return roots;
+    }
+
+    // поиск соседних элементов
+    private async Task<List<DepartmentDto>> GetSiblingsQuery(string path)
+    {
+        const string dapperSql =
+            """
+            SELECT d.id, d.parent_id, d.name, d.depth, d.is_active, d.created_at, d.updated_at
+            FROM directory_service.departments d
+            WHERE subpath(d.path, 0, nlevel(d.path) - 1) = subpath(@path::ltree, 0, nlevel(@path::ltree) - 1)
+              AND d.path != @path::ltree
+            ORDER BY d.id
+            """;
+
+        var dbConn = DbContext.Database.GetDbConnection();
+
+        var rows = (await dbConn.QueryAsync<DepartmentDto>(dapperSql, new
+        {
+            path
+        })).ToList();
+
+        return rows;
     }
 
     private async Task<List<DepartmentDto>> GetHierarchyRecursive(string rootPath) // adjacency list
@@ -63,6 +244,44 @@ public class LtreeTests : DirectoryTestsBase
         var dbConn = DbContext.Database.GetDbConnection();
 
         var departmentRaws = (await dbConn.QueryAsync<DepartmentDto>(dapperSql, new { rootPath })).ToList();
+
+        var departmentsDict = departmentRaws.ToDictionary(x => x.Id);
+        var roots = new List<DepartmentDto>();
+
+        foreach (var row in departmentRaws)
+        {
+            if (row.ParentId.HasValue &&
+                departmentsDict.TryGetValue(row.ParentId.Value, out var parent))
+                parent.Children.Add(departmentsDict[row.Id]);
+            else
+                roots.Add(departmentsDict[row.Id]);
+        }
+
+        return roots;
+    }
+
+    private async Task<List<DepartmentDto>> GetHierarchyLtree(string rootPath) // materialized path
+    {
+        const string dapperSql = """
+                                 SELECT id,
+                                     parent_id,
+                                     name,
+                                     path,
+                                     depth,
+                                     is_active,
+                                     created_at,
+                                     updated_at
+                                 FROM directory_service.departments
+                                 WHERE path <@ @rootPath::ltree
+                                 ORDER BY depth
+                                 """;
+
+        var dbConn = DbContext.Database.GetDbConnection();
+
+        var departmentRaws = (await dbConn.QueryAsync<DepartmentDto>(dapperSql, new
+        {
+            rootPath
+        })).ToList();
 
         var departmentsDict = departmentRaws.ToDictionary(x => x.Id);
         var roots = new List<DepartmentDto>();
