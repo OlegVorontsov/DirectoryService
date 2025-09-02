@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DirectoryService.Infrastructure.DataBase.Migrations
 {
     [DbContext(typeof(ApplicationWriteDBContext))]
-    [Migration("20250624134140_AddDepartmentPositionAndFixes")]
-    partial class AddDepartmentPositionAndFixes
+    [Migration("20250902091703_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,6 +50,12 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uuid")
                         .HasColumnName("parent_id");
@@ -63,23 +69,6 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<uint>("version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid")
-                        .HasColumnName("xmin");
-
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "DirectoryService.Domain.Models.Department.Name#DepartmentName", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("character varying(150)")
-                                .HasColumnName("name");
-                        });
-
                     b.HasKey("Id")
                         .HasName("pk_departments");
 
@@ -87,7 +76,9 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
                         .HasDatabaseName("ix_departments_parent_id");
 
                     b.HasIndex("Path")
-                        .HasDatabaseName("ix_departments_path");
+                        .HasDatabaseName("idx_departments_path");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Path"), "gist");
 
                     b.ToTable("departments", "directory_service");
                 });
@@ -268,7 +259,7 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
 
             modelBuilder.Entity("DirectoryService.Domain.Models.Location", b =>
                 {
-                    b.OwnsOne("DirectoryService.Domain.ValueObjects.LocationValueObjects.LocationAddress", "Address", b1 =>
+                    b.OwnsOne("DirectoryService.Domain.ValueObjects.Locations.LocationAddress", "Address", b1 =>
                         {
                             b1.Property<Guid>("LocationId")
                                 .HasColumnType("uuid");

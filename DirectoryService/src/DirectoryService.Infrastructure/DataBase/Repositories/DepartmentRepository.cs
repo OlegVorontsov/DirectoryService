@@ -3,12 +3,16 @@ using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Domain.Models;
 using DirectoryService.Infrastructure.DataBase.Write;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SharedService.SharedKernel.BaseClasses;
 using SharedService.SharedKernel.Errors;
 
 namespace DirectoryService.Infrastructure.DataBase.Repositories;
 
-public class DepartmentRepository(ApplicationWriteDBContext context) : IDepartmentRepository
+public class DepartmentRepository(
+    ApplicationWriteDBContext context,
+    ILogger<DepartmentRepository> logger)
+    : IDepartmentRepository
 {
     public async Task<Result<Department>> CreateAsync(
         Department entity, CancellationToken cancellationToken = default)
@@ -38,6 +42,62 @@ public class DepartmentRepository(ApplicationWriteDBContext context) : IDepartme
             return Errors.General.NotFound(id.Value);
 
         return entity;
+    }
+
+    public async Task<Result<Department, Error>> GetByIdWithLock(
+        Id<Department> departmentId, CancellationToken cancellationToken = default)
+    {
+        var id = departmentId.Value;
+
+        var department = await context.Departments
+            .FromSql($"SELECT * FROM directory_service.departments WHERE id = {id} FOR UPDATE")
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return department is null ?
+            Errors.General.NotFound(departmentId.Value) :
+            department;
+    }
+
+    public async Task<UnitResult<Error>> LockDescendants(LTree path, CancellationToken cancellationToken)
+    {
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT * FROM directory_service.departments WHERE path <@ {path}::ltree AND path != {path}::ltree FOR UPDATE",
+            cancellationToken);
+
+        return UnitResult.Success<Error>();
+    }
+
+    public async Task<UnitResult<Error>> SaveChanges(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+            return UnitResult.Success<Error>();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error saving changes");
+            return UnitResult.Failure<Error>(Errors.General.Failure());
+        }
+    }
+
+    public async Task<UnitResult<Error>> BulkUpdateDescendantsPathAndDepth(
+        LTree oldPath,
+        LTree newPath,
+        int depthDelta,
+        DateTime updatedAtUtc,
+        CancellationToken cancellationToken)
+    {
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             UPDATE directory_service.departments
+             SET path = {newPath}::ltree || subpath(path, nlevel({oldPath}::ltree)),
+                 depth = depth + {depthDelta},
+                 updated_at = {updatedAtUtc}
+             WHERE path <@ {oldPath}::ltree AND path != {oldPath}::ltree
+             """, cancellationToken);
+
+        return UnitResult.Success<Error>();
     }
 
     public async Task<UnitResult<Error>> IsPathUniqueAsync(

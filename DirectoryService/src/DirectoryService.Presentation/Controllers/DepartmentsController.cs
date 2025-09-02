@@ -1,4 +1,5 @@
 using DirectoryService.Application.Commands.Departments.CreateDepartment;
+using DirectoryService.Application.Commands.Departments.MoveDepartment;
 using DirectoryService.Application.Commands.Departments.SoftDeleteDepartment;
 using DirectoryService.Application.Commands.Departments.UpdateDepartment;
 using DirectoryService.Application.Queries.Departments.GetChildrenDepartments;
@@ -25,6 +26,14 @@ public class DepartmentsController : ApplicationController
     public async Task<EndpointResult<DepartmentDTO>> Update(
         [FromServices] UpdateDepartmentHandler handler,
         [FromBody] UpdateDepartmentRequest request,
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(request.ToCommand(id), cancellationToken);
+
+    [HttpPut("move/{id:guid}")]
+    public async Task<EndpointResult<DepartmentDTO>> Move(
+        [FromServices] MoveDepartmentHandler handler,
+        [FromBody] MoveDepartmentRequest request,
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default) =>
         await handler.Handle(request.ToCommand(id), cancellationToken);
