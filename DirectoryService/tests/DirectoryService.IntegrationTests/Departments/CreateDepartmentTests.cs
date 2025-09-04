@@ -44,4 +44,36 @@ public class CreateDepartmentTests : DirectoryTestsBase
         createdDepartment.Path.Should().Be(new LTree("it-otdel"));
         createdDepartment.DepartmentLocations.Should().HaveCount(2);
     }
+
+    [Fact]
+    public async Task CreateChildDepartment_WithValidData_ShouldSucceed()
+    {
+        // Arrange
+        var location = await Seeder.SeedLocationAsync("Parent Location");
+        var parentDepartment = await Seeder.SeedParentDepartmentAsync("Parent Department");
+
+        var command = new CreateDepartmentCommand(
+            "Child отдел", [location.Id.Value], parentDepartment.Id.Value);
+
+        var cancellationToken = CancellationToken.None;
+
+        // Act
+        var result = await _sut.Handle(command, cancellationToken);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+
+        var departmentId = result.Value.Id;
+        var createdDepartment = await DbContext.Departments
+            .Include(d => d.DepartmentLocations)
+            .Include(d => d.Parent)
+            .FirstAsync(d => d.Id == Id<Department>.Create(departmentId), cancellationToken: cancellationToken);
+
+        createdDepartment.Should().NotBeNull();
+        createdDepartment.Parent.Should().NotBeNull();
+        createdDepartment.Name.Value.Should().Be(command.Name);
+        createdDepartment.Path.Should().Be(new LTree("parent-department.child-otdel"));
+        createdDepartment.DepartmentLocations.Should().HaveCount(1);
+    }
 }
