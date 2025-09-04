@@ -45,9 +45,6 @@ public class DirectoryTestWebFactory : WebApplicationFactory<Program>, IAsyncLif
 
         await _context.Database.ExecuteSqlRawAsync(
             "CREATE INDEX IF NOT EXISTS departments_path_gist_idx ON directory_service.departments USING GIST (path);");
-
-        // _dbConnection = new NpgsqlConnection(_dbContainer.GetConnectionString());
-        // await InitializeRespawner();
     }
 
     public async Task ResetDatabaseAsync()
@@ -60,6 +57,7 @@ public class DirectoryTestWebFactory : WebApplicationFactory<Program>, IAsyncLif
         await _dbContainer.StopAsync();
         await _dbContainer.DisposeAsync();
 
+        await _dbConnection.CloseAsync();
         await _dbConnection.DisposeAsync();
     }
 
