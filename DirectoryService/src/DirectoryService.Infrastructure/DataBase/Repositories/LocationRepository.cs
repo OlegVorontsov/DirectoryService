@@ -111,10 +111,11 @@ public class LocationRepository(
             UnitResult.Success<Error>();
     }
 
-    public async Task<UnitResult<Error>> AreLocationsValidAsync(
+    public async Task<bool> AreLocationsValidAsync(
         IEnumerable<Id<Location>> locationIds, CancellationToken cancellationToken = default)
     {
-        var existingIds = await context.Locations
+        return await context.Locations.AnyAsync(l => locationIds.Contains(l.Id), cancellationToken);
+        /*var existingIds = await context.Locations
             .Where(l => locationIds.Contains(l.Id))
             .Select(l => l.Id)
             .ToListAsync(cancellationToken);
@@ -124,6 +125,6 @@ public class LocationRepository(
             return Errors.General.NotFound(id.Value);
         }
 
-        return UnitResult.Success<Error>();
+        return UnitResult.Success<Error>();*/
     }
 }

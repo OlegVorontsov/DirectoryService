@@ -87,6 +87,20 @@ public class TestDataSeeder(ApplicationWriteDBContext context)
         return parentDepartment;
     }
 
+    public async Task<Department> SeedParentDepartmentWithoutLocationAsync(
+        string name = "Test ParentDepartment")
+    {
+        var parentDepartment = Department.Create(
+            id: Id<Department>.GenerateNew(),
+            name: DepartmentName.Create(name).Value,
+            parent: null).Value!;
+
+        context.Departments.Add(parentDepartment);
+        await context.SaveChangesAsync();
+
+        return parentDepartment;
+    }
+
     public async Task<Department> SeedChildDepartmentAsync(
         Department parent,
         string name = "Test ChildDepartment")

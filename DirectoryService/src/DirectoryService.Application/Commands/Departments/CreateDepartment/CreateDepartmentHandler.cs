@@ -34,8 +34,8 @@ public class CreateDepartmentHandler(
         var locationIds = command.LocationIds.Select(Id<Location>.Create);
         var areLocationsValidResult = await locationRepository.AreLocationsValidAsync(
             locationIds, cancellationToken);
-        if (areLocationsValidResult.IsFailure)
-            return areLocationsValidResult.Error.ToErrors();
+        if (!areLocationsValidResult)
+            return Errors.General.Failure("Locations are not valid").ToErrors();
 
         Id<Department>? parentId = null;
         Department? parent = null;

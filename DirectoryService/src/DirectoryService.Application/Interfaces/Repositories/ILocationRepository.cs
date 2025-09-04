@@ -42,7 +42,7 @@ public interface ILocationRepository
         LocationAddress address,
         CancellationToken cancellationToken = default);
 
-    Task<UnitResult<Error>> AreLocationsValidAsync(
+    Task<bool> AreLocationsValidAsync(
         IEnumerable<Id<Location>> locationIds,
         CancellationToken cancellationToken = default);
 }
