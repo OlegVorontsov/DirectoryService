@@ -54,7 +54,7 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    time_zone = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    time_zone = table.Column<string>(type: "text", nullable: false),
                     address = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
@@ -106,6 +106,33 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "department_positions",
+                schema: "directory_service",
+                columns: table => new
+                {
+                    department_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    position_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_department_positions", x => new { x.department_id, x.position_id });
+                    table.ForeignKey(
+                        name: "fk_department_positions_departments_department_id",
+                        column: x => x.department_id,
+                        principalSchema: "directory_service",
+                        principalTable: "departments",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_department_positions_positions_position_id",
+                        column: x => x.position_id,
+                        principalSchema: "directory_service",
+                        principalTable: "positions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "ix_department_locations_location_id",
                 schema: "directory_service",
@@ -113,17 +140,23 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
                 column: "location_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_department_positions_position_id",
+                schema: "directory_service",
+                table: "department_positions",
+                column: "position_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_departments_path",
+                schema: "directory_service",
+                table: "departments",
+                column: "path")
+                .Annotation("Npgsql:IndexMethod", "gist");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_departments_parent_id",
                 schema: "directory_service",
                 table: "departments",
                 column: "parent_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_departments_path",
-                schema: "directory_service",
-                table: "departments",
-                column: "path",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_locations_name",
@@ -148,7 +181,11 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
                 schema: "directory_service");
 
             migrationBuilder.DropTable(
-                name: "positions",
+                name: "department_positions",
+                schema: "directory_service");
+
+            migrationBuilder.DropTable(
+                name: "locations",
                 schema: "directory_service");
 
             migrationBuilder.DropTable(
@@ -156,7 +193,7 @@ namespace DirectoryService.Infrastructure.DataBase.Migrations
                 schema: "directory_service");
 
             migrationBuilder.DropTable(
-                name: "locations",
+                name: "positions",
                 schema: "directory_service");
         }
     }

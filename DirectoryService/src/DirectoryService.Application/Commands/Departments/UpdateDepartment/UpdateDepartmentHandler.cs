@@ -86,8 +86,8 @@ public class UpdateDepartmentHandler(
             var areLocationsValidResult = await locationRepository.AreLocationsValidAsync(
                 locationIds,
                 cancellationToken);
-            if (areLocationsValidResult.IsFailure)
-                return areLocationsValidResult.Error.ToErrors();
+            if (!areLocationsValidResult)
+                return Errors.General.Failure("Locations").ToErrors();
         }
 
         // ef entity is unchanged return

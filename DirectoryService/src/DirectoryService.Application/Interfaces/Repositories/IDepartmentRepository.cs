@@ -16,9 +16,25 @@ public interface IDepartmentRepository
         Department entity,
         CancellationToken cancellationToken = default);
 
+    Task<UnitResult<Error>> SaveChanges(CancellationToken cancellationToken = default);
+
+    Task<UnitResult<Error>> BulkUpdateDescendantsPathAndDepth(
+        LTree oldPath,
+        LTree newPath,
+        int depthDelta,
+        DateTime updatedAtUtc,
+        CancellationToken cancellationToken = default);
+
     Task<Result<Department, Error>> GetByIdAsync(
         Id<Department> id,
         CancellationToken cancellationToken = default);
+
+    Task<Result<Department, Error>> GetByIdWithLock(
+        Id<Department> departmentId,
+        CancellationToken cancellationToken = default);
+
+    Task<UnitResult<Error>> LockDescendants(
+        LTree path, CancellationToken cancellationToken = default);
 
     Task<UnitResult<Error>> IsPathUniqueAsync(
         LTree path,

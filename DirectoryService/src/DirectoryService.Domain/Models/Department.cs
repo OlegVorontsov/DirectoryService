@@ -31,7 +31,7 @@ public class Department
     public List<Department> Children { get; private set; }
 
     // for optimistic locking in EF Core
-    private uint version;
+    // private uint version;
 
     public static Result<Department, Error> Create(
         Id<Department> id,
@@ -63,6 +63,24 @@ public class Department
         UpdatedAt = DateTime.UtcNow;
 
         return this;
+    }
+
+    public Result<int, Error> MoveTo(Department? newParent)
+    {
+        var oldDepth = Depth;
+
+        var newPathResult = CreatePath(Name, newParent?.Path);
+        if(newPathResult.IsFailure) return newPathResult.Error;
+
+        ParentId = newParent?.Id;
+        Path = newPathResult.Value;
+        Depth = newParent == null ?
+            (short)0 :
+            (short)(newParent.Depth < short.MaxValue ?
+                newParent.Depth + 1 : short.MaxValue);
+        UpdatedAt = DateTime.UtcNow;
+
+        return Depth - oldDepth;
     }
 
     public Department UpdateLocations(IEnumerable<Id<Location>> locationIds)

@@ -123,14 +123,11 @@ public class LtreeTests : DirectoryTestsBase
 
         foreach (var row in departmentRaws)
         {
-            if (row.ParentId.HasValue && departmentsDict.TryGetValue(row.ParentId.Value, out var parent))
-            {
+            if (row.ParentId.HasValue &&
+                departmentsDict.TryGetValue(row.ParentId.Value, out var parent))
                 parent.Children.Add(departmentsDict[row.Id]);
-            }
             else
-            {
                 roots.Add(departmentsDict[row.Id]);
-            }
         }
 
         return roots;

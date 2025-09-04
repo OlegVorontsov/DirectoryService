@@ -23,7 +23,7 @@ public class DirectoryTestsBase : IClassFixture<DirectoryTestWebFactory>, IAsync
         Fixture = new Fixture();
         Factory = factory;
 
-        //Seeder = new TestDataSeeder(DbContext);
+        Seeder = new TestDataSeeder(DbContext);
     }
 
     public Task InitializeAsync() => Task.CompletedTask;

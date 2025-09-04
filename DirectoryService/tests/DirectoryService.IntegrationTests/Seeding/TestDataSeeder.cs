@@ -9,6 +9,8 @@ namespace DirectoryService.IntegrationTests.Seeding;
 
 public class TestDataSeeder(ApplicationWriteDBContext context)
 {
+    private Random random = new Random();
+
     public async Task<Location> SeedLocationAsync(string name = "Test Location")
     {
         var location = Location.Create(
@@ -70,7 +72,7 @@ public class TestDataSeeder(ApplicationWriteDBContext context)
     public async Task<Department> SeedParentDepartmentAsync(
         string name = "Test ParentDepartment")
     {
-        var location = await SeedLocationAsync();
+        var location = await SeedLocationAsync($"Test Location {random.Next()}");
 
         var parentDepartment = Department.Create(
             id: Id<Department>.GenerateNew(),
@@ -85,11 +87,25 @@ public class TestDataSeeder(ApplicationWriteDBContext context)
         return parentDepartment;
     }
 
+    public async Task<Department> SeedParentDepartmentWithoutLocationAsync(
+        string name = "Test ParentDepartment")
+    {
+        var parentDepartment = Department.Create(
+            id: Id<Department>.GenerateNew(),
+            name: DepartmentName.Create(name).Value,
+            parent: null).Value!;
+
+        context.Departments.Add(parentDepartment);
+        await context.SaveChangesAsync();
+
+        return parentDepartment;
+    }
+
     public async Task<Department> SeedChildDepartmentAsync(
         Department parent,
         string name = "Test ChildDepartment")
     {
-        var location = await SeedLocationAsync();
+        var location = await SeedLocationAsync($"Test Location {random.Next()}");
 
         var childDepartment = Department.Create(
             id: Id<Department>.GenerateNew(),
