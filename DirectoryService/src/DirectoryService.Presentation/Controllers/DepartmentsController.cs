@@ -4,6 +4,7 @@ using DirectoryService.Application.Commands.Departments.SoftDeleteDepartment;
 using DirectoryService.Application.Commands.Departments.UpdateDepartment;
 using DirectoryService.Application.Queries.Departments.GetChildrenDepartments;
 using DirectoryService.Application.Queries.Departments.GetRootDepartments;
+using DirectoryService.Application.Queries.Departments.GetTopPositions;
 using DirectoryService.Application.Shared.DTOs;
 using DirectoryService.Contracts.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -59,4 +60,11 @@ public class DepartmentsController : ApplicationController
         [FromQuery] GetChildrenDepartmentsRequest request,
         CancellationToken cancellationToken = default) =>
         await handler.Handle(request.ToQuery(id), cancellationToken);
+
+    [HttpGet("top-positions")]
+    public async Task<EndpointResult<GetTopPositionsResponse>> GetTopPositions(
+        [FromServices] GetTopPositionsHandler handler,
+        [FromQuery] GetTopPositionsQuery query,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(query, cancellationToken);
 }
