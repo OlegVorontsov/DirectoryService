@@ -70,10 +70,69 @@ public class LtreeTests : DirectoryTestsBase
     {
         await InitializeHierarchy();
 
-        var rootsWithChildren = await GetRootsWithFirstNChildrenQuery(2);
+        var rootsWithChildren = await GetRootsWithFirstNChildrenLessonQuery(2);
 
         rootsWithChildren.Should().HaveCount(1);
         rootsWithChildren[0].Children.Should().HaveCount(2);
+    }
+
+    private async Task<List<DepartmentDto>> GetRootsWithFirstNChildrenLessonQuery(int childrenCount)
+    {
+        const string dapperSql = """
+                                 WITH roots AS (SELECT d.id,
+                                                       d.parent_id,
+                                                       d.name,
+                                                       d.path,
+                                                       d.depth,
+                                                       d.is_active,
+                                                       d.created_at,
+                                                       d.updated_at
+                                                FROM directory_service.departments d
+                                                WHERE d.parent_id is null
+                                                order by d.created_at
+                                                offset 0 limit 10)
+                                 select *,
+                                        (exists(select 1 from directory_service.departments where parent_id = roots.id offset 6 limit 1)) as has_more_children
+                                 from roots
+                                 union all
+                                 select c.*,
+                                        (exists(select 1 from directory_service.departments where parent_id = c.id)) as has_more_children
+                                 from roots r
+                                             cross join lateral (SELECT d.id,
+                                                                        d.parent_id,
+                                                                        d.name,
+                                                                        d.path,
+                                                                        d.depth,
+                                                                        d.is_active,
+                                                                        d.created_at,
+                                                                        d.updated_at
+                                                                 FROM directory_service.departments d
+                                                                 WHERE d.parent_id = r.id
+                                                                 and d.is_active = true
+                                                                 order by d.created_at
+                                                                 limit 6) c;
+                                 """;
+
+        var dbConn = DbContext.Database.GetDbConnection();
+
+        var departmentRaws = (await dbConn.QueryAsync<DepartmentDto>(dapperSql, new
+        {
+            childrenCount
+        })).ToList();
+
+        var departmentsDict = departmentRaws.ToDictionary(x => x.Id);
+        var roots = new List<DepartmentDto>();
+
+        foreach (var row in departmentRaws)
+        {
+            if (row.ParentId.HasValue &&
+                departmentsDict.TryGetValue(row.ParentId.Value, out var parent))
+                parent.Children.Add(departmentsDict[row.Id]);
+            else
+                roots.Add(departmentsDict[row.Id]);
+        }
+
+        return roots;
     }
 
     private async Task<List<DepartmentDto>> GetRootsWithFirstNChildrenQuery(int childrenCount)
@@ -372,4 +431,5 @@ public sealed class DepartmentDto
     public DateTime UpdatedAt { get; set; }
 
     public List<DepartmentDto> Children { get; set; } = [];
+    public bool HasMoreChildren { get; set; }
 }
