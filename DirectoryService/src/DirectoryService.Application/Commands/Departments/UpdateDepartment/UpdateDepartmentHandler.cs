@@ -1,6 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryService.Application.Interfaces.Caching;
 using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Application.Shared.DTOs;
+using DirectoryService.Domain;
 using DirectoryService.Domain.Models;
 using DirectoryService.Domain.ValueObjects.Departments;
 using FluentValidation;
@@ -20,7 +22,8 @@ public class UpdateDepartmentHandler(
     IDepartmentRepository departmentRepository,
     ILocationRepository locationRepository,
     IDepartmentLocationRepository departmentLocationRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ICacheService cacheService)
     : ICommandHandler<DepartmentDTO, UpdateDepartmentCommand>
 {
     public async Task<Result<DepartmentDTO, ErrorList>> Handle(
@@ -184,6 +187,8 @@ public class UpdateDepartmentHandler(
             logger.LogInformation("New parent with id {id} was updated", newParent.Id);
         if (childrenChangedCount > 0)
             logger.LogInformation("Updated {count} children", childrenChangedCount);
+
+        await cacheService.RemoveByPrefixAsync(Constants.CacheConstants.DEPARTMENTS_PREFIX, cancellationToken);
 
         return DepartmentDTO.FromDomainEntity(entity);
     }

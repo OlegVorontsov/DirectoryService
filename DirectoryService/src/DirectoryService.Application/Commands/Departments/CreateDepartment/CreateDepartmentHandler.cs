@@ -1,6 +1,8 @@
 using CSharpFunctionalExtensions;
+using DirectoryService.Application.Interfaces.Caching;
 using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Application.Shared.DTOs;
+using DirectoryService.Domain;
 using DirectoryService.Domain.Models;
 using DirectoryService.Domain.ValueObjects.Departments;
 using FluentValidation;
@@ -18,7 +20,8 @@ public class CreateDepartmentHandler(
     ILogger<CreateDepartmentHandler> logger,
     IDepartmentRepository departmentRepository,
     ILocationRepository locationRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ICacheService cacheService)
     : ICommandHandler<DepartmentDTO, CreateDepartmentCommand>
 {
     public async Task<Result<DepartmentDTO, ErrorList>> Handle(
@@ -95,6 +98,8 @@ public class CreateDepartmentHandler(
             "Department created with id {0} name {1}",
             entity.Name.Value,
             entity.Id.Value);
+
+        await cacheService.RemoveByPrefixAsync(Constants.CacheConstants.DEPARTMENTS_PREFIX, cancellationToken);
 
         return DepartmentDTO.FromDomainEntity(entity);
     }
