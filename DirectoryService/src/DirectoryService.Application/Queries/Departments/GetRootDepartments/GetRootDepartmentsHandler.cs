@@ -1,7 +1,10 @@
 using CSharpFunctionalExtensions;
 using Dapper;
+using DirectoryService.Application.Interfaces.Caching;
 using DirectoryService.Application.Shared.DTOs;
+using DirectoryService.Domain;
 using FluentValidation;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using SharedService.Core.Abstractions;
 using SharedService.Core.Database.Builders;
@@ -16,9 +19,15 @@ namespace DirectoryService.Application.Queries.Departments.GetRootDepartments;
 public class GetRootDepartmentsHandler(
     IValidator<GetRootDepartmentsQuery> validator,
     ILogger<GetRootDepartmentsHandler> logger,
-    IDBConnectionFactory connectionFactory)
+    IDBConnectionFactory connectionFactory,
+    ICacheService cache)
     : IQueryHandlerWithResult<FilteredListDTO<DepartmentTreeDTO>, GetRootDepartmentsQuery>
 {
+    private readonly DistributedCacheEntryOptions _cacheOptions = new()
+    {
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(Constants.CacheConstants.DEFAULT_EXPIRATION_MINUTES),
+    };
+
     public async Task<Result<FilteredListDTO<DepartmentTreeDTO>, ErrorList>> Handle(
         GetRootDepartmentsQuery query, CancellationToken cancellationToken = default)
     {
@@ -27,6 +36,26 @@ public class GetRootDepartmentsHandler(
         if (validationResult.IsValid == false)
             return validationResult.ToList();
 
+        var key = Constants.CacheConstants.DEPARTMENTS_PREFIX + query.Prefetch;
+        var result = await cache.GetOrSetAsync(
+            key,
+            _cacheOptions,
+            async () => await GetRootDepartments(query, cancellationToken),
+            cancellationToken);
+
+        if (result is null)
+            return Errors.General.NotFound().ToErrors();
+
+        return new FilteredListDTO<DepartmentTreeDTO>(
+            Page: query.Page,
+            Size: query.Size,
+            Data: result.Departments,
+            Total: result.TotalCount);
+    }
+
+    private async Task<GetRootDepartmentsDto> GetRootDepartments(
+        GetRootDepartmentsQuery query, CancellationToken cancellationToken)
+    {
         using var connection = connectionFactory.Create();
 
         var totalCountBuilder = new CustomSQLBuilder(
@@ -43,14 +72,14 @@ public class GetRootDepartmentsHandler(
 
         var multipleSelectBuilder = new CustomSQLBuilder(
             """
-            SELECT id, name, parent_id, path, depth, children_count
+            SELECT id, name, parent_id, path, depth, children_count, is_active, created_at, updated_at
             FROM directory_service.departments
             WHERE is_active = true AND depth = 0
             ORDER BY name
             LIMIT @limit OFFSET @offset;
             SELECT *
             FROM (SELECT
-                id, name, parent_id, path, depth, children_count,
+                id, name, parent_id, path, depth, children_count, is_active, created_at, updated_at,
                 ROW_NUMBER () OVER (
                     PARTITION BY parent_id
                     ORDER BY name)
@@ -84,11 +113,6 @@ public class GetRootDepartmentsHandler(
                 roots[index].Children.Add(child);
         }
 
-        // roots' children now filled
-        return new FilteredListDTO<DepartmentTreeDTO>(
-            Page: query.Page,
-            Size: query.Size,
-            Data: roots,
-            Total: totalCount);
+        return new GetRootDepartmentsDto(totalCount, roots);
     }
 }
