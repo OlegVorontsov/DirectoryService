@@ -3,6 +3,7 @@ using DirectoryService.Application.Commands.Departments.MoveDepartment;
 using DirectoryService.Application.Commands.Departments.SoftDeleteDepartment;
 using DirectoryService.Application.Commands.Departments.UpdateDepartment;
 using DirectoryService.Application.Queries.Departments.GetChildrenDepartments;
+using DirectoryService.Application.Queries.Departments.GetDepartmentById;
 using DirectoryService.Application.Queries.Departments.GetRootDepartments;
 using DirectoryService.Application.Queries.Departments.GetTopPositions;
 using DirectoryService.Application.Shared.DTOs;
@@ -45,6 +46,13 @@ public class DepartmentsController : ApplicationController
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default) =>
         await handler.Handle(new SoftDeleteDepartmentCommand(id), cancellationToken);
+
+    [HttpGet("{id:guid}")]
+    public async Task<EndpointResult<DepartmentDTO>> Get(
+        [FromServices] GetDepartmentByIdHandler handler,
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default) =>
+        await handler.Handle(new GetDepartmentByIdQuery(id), cancellationToken);
 
     [HttpGet("roots")]
     public async Task<EndpointResult<FilteredListDTO<DepartmentTreeDTO>>> GetRoots(
