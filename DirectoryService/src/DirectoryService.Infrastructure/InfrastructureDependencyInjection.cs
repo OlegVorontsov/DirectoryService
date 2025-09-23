@@ -1,3 +1,4 @@
+using DirectoryService.Application.Interfaces.Caching;
 using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Infrastructure.DataBase;
 using DirectoryService.Infrastructure.DataBase.Read;
@@ -70,6 +71,8 @@ public static class InfrastructureDependencyInjection
 
             options.Configuration = connection;
         });
+
+        services.AddSingleton<ICacheService, CacheService>();
 
         return services;
     }
