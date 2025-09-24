@@ -1,5 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryService.Application.Interfaces.Caching;
 using DirectoryService.Application.Interfaces.Repositories;
+using DirectoryService.Domain;
 using DirectoryService.Domain.Models;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -16,7 +18,8 @@ public class SoftDeleteDepartmentHandler(
     ILogger<SoftDeleteDepartmentHandler> logger,
     IDepartmentRepository departmentRepository,
     ILocationRepository locationRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ICacheService cacheService)
     : ICommandHandler<Guid, SoftDeleteDepartmentCommand>
 {
     public async Task<Result<Guid, ErrorList>> Handle(
@@ -70,6 +73,8 @@ public class SoftDeleteDepartmentHandler(
         logger.LogInformation("Department with id {id} was deactivated", entity.Id);
         if (entity.Parent is not null)
             logger.LogInformation("Parent with id {id} was updated", entity.Parent.Id);
+
+        await cacheService.RemoveByPrefixAsync(Constants.CacheConstants.DEPARTMENTS_PREFIX, cancellationToken);
 
         return entity.Id.Value;
     }

@@ -1,3 +1,4 @@
+using DirectoryService.Application.Interfaces.Caching;
 using DirectoryService.Application.Interfaces.Repositories;
 using DirectoryService.Infrastructure.DataBase;
 using DirectoryService.Infrastructure.DataBase.Read;
@@ -20,7 +21,8 @@ public static class InfrastructureDependencyInjection
         IConfiguration configuration)
     {
         services.AddDataBase(configuration)
-                .AddBackgroundServices(configuration);
+                .AddBackgroundServices(configuration)
+                .AddDistributedCache(configuration);
 
         return services;
     }
@@ -55,6 +57,22 @@ public static class InfrastructureDependencyInjection
         var configs = configuration.GetSection("SoftDeleteCleaner");
         services.Configure<SoftDeleteCleanerBackgroundService.SoftDeleteCleanerOptions>(configs);
         services.AddHostedService<SoftDeleteCleanerBackgroundService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDistributedCache(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            string connection = configuration.GetConnectionString("Redis") ??
+                                throw new ArgumentNullException(nameof(connection));
+
+            options.Configuration = connection;
+        });
+
+        services.AddSingleton<ICacheService, CacheService>();
 
         return services;
     }

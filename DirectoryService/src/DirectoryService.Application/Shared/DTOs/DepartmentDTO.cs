@@ -8,14 +8,20 @@ public record DepartmentDTO(
     Guid? ParentId,
     string Path,
     short Depth,
-    int ChildrenCount)
+    int ChildrenCount,
+    bool IsActive,
+    DateTime CreatedAt,
+    DateTime UpdatedAt)
 {
     public static DepartmentDTO FromDomainEntity(Department entity)
         => new(
-            entity.Id.Value,
-            entity.Name.Value,
-            entity.ParentId?.Value,
-            entity.Path,
-            entity.Depth,
-            entity.ChildrenCount);
+            Id: entity.Id.Value,
+            Name: entity.Name.Value,
+            ParentId: entity.ParentId?.Value,
+            Path: entity.Path,
+            Depth: entity.Depth,
+            ChildrenCount: entity.ChildrenCount,
+            IsActive: entity.IsActive,
+            CreatedAt: entity.CreatedAt,
+            UpdatedAt: entity.UpdatedAt);
 }
